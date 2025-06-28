@@ -3,12 +3,36 @@ import Chart from 'chart.js/auto';
 // Global chart instances
 window.dashboardCharts = {
     systemOverview: null,
-    userTrend: null
+    userTrend: null,
+    dailySales: null,
+    paymentMethod: null
 };
 
 // Initialize charts function
 function initializeDashboardCharts() {
-    // Check if we're on the dashboard page
+    let success = false;
+    
+    // Initialize admin charts if they exist
+    const systemChartEl = document.getElementById('systemOverviewChart');
+    const trendChartEl = document.getElementById('userTrendChart');
+    
+    if (systemChartEl && trendChartEl) {
+        success = initializeAdminCharts() || success;
+    }
+    
+    // Initialize POS charts if they exist
+    const dailySalesEl = document.getElementById('dailySalesChart');
+    const paymentMethodEl = document.getElementById('paymentMethodChart');
+    
+    if (dailySalesEl && paymentMethodEl) {
+        success = initializePOSCharts() || success;
+    }
+    
+    return success;
+}
+
+// Initialize admin charts function
+function initializeAdminCharts() {
     const systemChartEl = document.getElementById('systemOverviewChart');
     const trendChartEl = document.getElementById('userTrendChart');
     
@@ -109,7 +133,7 @@ function initializeDashboardCharts() {
         return true;
         
     } catch (error) {
-        console.error('Error initializing charts:', error);
+        console.error('Error initializing admin charts:', error);
         return false;
     }
 }
@@ -142,7 +166,16 @@ function tryInitializeWithRetry() {
     
     delays.forEach(delay => {
         setTimeout(() => {
-            if (!window.dashboardCharts.systemOverview && !window.dashboardCharts.userTrend) {
+            // Check if any charts need initialization
+            const needsAdminCharts = document.getElementById('systemOverviewChart') && 
+                                   document.getElementById('userTrendChart') &&
+                                   (!window.dashboardCharts.systemOverview || !window.dashboardCharts.userTrend);
+                                   
+            const needsPOSCharts = document.getElementById('dailySalesChart') && 
+                                 document.getElementById('paymentMethodChart') &&
+                                 (!window.dashboardCharts.dailySales || !window.dashboardCharts.paymentMethod);
+            
+            if (needsAdminCharts || needsPOSCharts) {
                 initializeDashboardCharts();
             }
         }, delay);
@@ -152,3 +185,119 @@ function tryInitializeWithRetry() {
 // Start retry attempts after DOM is ready
 document.addEventListener('DOMContentLoaded', tryInitializeWithRetry);
 document.addEventListener('livewire:navigated', tryInitializeWithRetry);
+
+// Initialize POS charts function
+function initializePOSCharts() {
+    const dailySalesEl = document.getElementById('dailySalesChart');
+    const paymentMethodEl = document.getElementById('paymentMethodChart');
+    
+    if (!dailySalesEl || !paymentMethodEl) {
+        return false;
+    }
+    
+    try {
+        // Destroy existing charts
+        if (window.dashboardCharts.dailySales) {
+            window.dashboardCharts.dailySales.destroy();
+        }
+        if (window.dashboardCharts.paymentMethod) {
+            window.dashboardCharts.paymentMethod.destroy();
+        }
+        
+        // Get daily sales data
+        const salesDataRaw = dailySalesEl.dataset.salesData;
+        const salesData = JSON.parse(salesDataRaw || '{"labels":[],"data":[]}');
+        
+        // Create Daily Sales Chart
+        const ctx1 = dailySalesEl.getContext('2d');
+        window.dashboardCharts.dailySales = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: salesData.labels || [],
+                datasets: [{
+                    label: 'Penjualan Harian (Rp)',
+                    data: salesData.data || [],
+                    borderColor: '#16A34A',
+                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#16A34A',
+                    pointBorderColor: '#FFFFFF',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { 
+                            color: getTickColor(),
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        },
+                        grid: { color: getGridColor() }
+                    },
+                    x: {
+                        ticks: { color: getTickColor() },
+                        grid: { color: getGridColor() }
+                    }
+                }
+            }
+        });
+        
+        // Get payment method data
+        const paymentDataRaw = paymentMethodEl.dataset.paymentData;
+        const paymentData = JSON.parse(paymentDataRaw || '{"labels":[],"data":[]}');
+        
+        // Create Payment Method Chart
+        const ctx2 = paymentMethodEl.getContext('2d');
+        window.dashboardCharts.paymentMethod = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: paymentData.labels || [],
+                datasets: [{
+                    data: paymentData.data || [],
+                    backgroundColor: ['#2563EB', '#16A34A', '#F59E0B', '#EF4444'],
+                    borderColor: ['#1D4ED8', '#15803D', '#D97706', '#DC2626'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            color: getThemeColor()
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = 'Rp ' + context.parsed.toLocaleString('id-ID');
+                                return label + ': ' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        return true;
+        
+    } catch (error) {
+        console.error('Error initializing POS charts:', error);
+        return false;
+    }
+}
