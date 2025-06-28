@@ -27,6 +27,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/products', \App\Livewire\Store\ManageProducts::class)->name('products');
     });
 
+    // POS Routes (untuk kasir)
+    Route::middleware(['store.context'])->prefix('pos')->name('pos.')->group(function () {
+        Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
+    });
+
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');

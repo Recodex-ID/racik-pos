@@ -27,6 +27,12 @@
                 @endrole
 
                 @hasrole('Admin|Store Manager|Cashier')
+                <flux:navlist.group :heading="__('Point of Sale')" class="grid">
+                    <flux:navlist.item icon="calculator" :href="route('pos.cashier')" :current="request()->routeIs('pos.cashier')" wire:navigate>Kasir</flux:navlist.item>
+                </flux:navlist.group>
+                @endhasrole
+
+                @hasrole('Admin|Store Manager')
                 <flux:navlist.group :heading="__('Toko')" class="grid">
                     <flux:navlist.item icon="folder" :href="route('store.categories')" :current="request()->routeIs('store.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
                     <flux:navlist.item icon="cube" :href="route('store.products')" :current="request()->routeIs('store.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
