@@ -49,6 +49,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'email' => 'zachranraze@recodex.id',
             'email_verified_at' => now(),
             'password' => Hash::make('admin123'),
+            'tenant_id' => null, // Super Admin tidak terikat tenant
+            'store_id' => null,  // Super Admin tidak terikat store
+            'is_active' => true,
         ]);
         $user->assignRole('Super Admin');
 
