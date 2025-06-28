@@ -37,19 +37,19 @@
         <div class="flex-1 flex flex-col">
             <!-- Product Search -->
             <div class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 p-6">
-                <flux:input 
-                    wire:model.live.debounce.300ms="productSearch" 
-                    placeholder="Cari produk (nama/SKU) atau scan barcode..." 
-                    icon="magnifying-glass" 
+                <flux:input
+                    wire:model.live.debounce.300ms="productSearch"
+                    placeholder="Cari produk (nama/SKU) atau scan barcode..."
+                    icon="magnifying-glass"
                     class="text-lg"
                     autofocus
                 />
-                
+
                 <!-- Product Search Results -->
                 @if($this->products->count() > 0)
                     <div class="mt-4 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
                         @foreach($this->products as $product)
-                            <div wire:click="addToCart({{ $product->id }})" 
+                            <div wire:click="addToCart({{ $product->id }})"
                                  class="flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-700 cursor-pointer border-b border-zinc-100 dark:border-zinc-600 last:border-b-0">
                                 <div class="flex-1">
                                     <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</div>
@@ -99,17 +99,17 @@
                                                 Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                             </div>
                                             <div class="flex items-center space-x-2">
-                                                <flux:button 
-                                                    wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] - 1 }})" 
+                                                <flux:button
+                                                    wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] - 1 }})"
                                                     size="sm" variant="outline" icon="minus" />
                                                 <span class="px-3 py-1 bg-zinc-100 dark:bg-zinc-700 rounded text-sm font-medium">
                                                     {{ $item['quantity'] }}
                                                 </span>
-                                                <flux:button 
-                                                    wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] + 1 }})" 
+                                                <flux:button
+                                                    wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] + 1 }})"
                                                     size="sm" variant="outline" icon="plus" />
-                                                <flux:button 
-                                                    wire:click="removeFromCart('{{ $key }}')" 
+                                                <flux:button
+                                                    wire:click="removeFromCart('{{ $key }}')"
                                                     size="sm" variant="outline" color="red" icon="x-mark" />
                                             </div>
                                         </div>
@@ -158,23 +158,23 @@
             <div class="p-6 border-b border-zinc-200 dark:border-zinc-700">
                 <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3 block">Diskon</label>
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    <flux:button 
-                        wire:click="$set('discountType', 'percentage')" 
-                        variant="{{ $discountType === 'percentage' ? 'primary' : 'outline' }}" 
+                    <flux:button
+                        wire:click="$set('discountType', 'percentage')"
+                        variant="{{ $discountType === 'percentage' ? 'primary' : 'outline' }}"
                         size="sm">
                         %
                     </flux:button>
-                    <flux:button 
-                        wire:click="$set('discountType', 'amount')" 
-                        variant="{{ $discountType === 'amount' ? 'primary' : 'outline' }}" 
+                    <flux:button
+                        wire:click="$set('discountType', 'amount')"
+                        variant="{{ $discountType === 'amount' ? 'primary' : 'outline' }}"
                         size="sm">
                         Rp
                     </flux:button>
                 </div>
-                <flux:input 
-                    wire:model.live="discountValue" 
-                    type="number" 
-                    step="0.01" 
+                <flux:input
+                    wire:model.live="discountValue"
+                    type="number"
+                    step="0.01"
                     placeholder="0" />
             </div>
 
@@ -209,10 +209,9 @@
 
             <!-- Payment Button -->
             <div class="p-6 border-t border-zinc-200 dark:border-zinc-700">
-                <flux:button 
-                    wire:click="openPaymentModal" 
-                    variant="primary" 
-                    size="lg" 
+                <flux:button
+                    wire:click="openPaymentModal"
+                    variant="primary"
                     class="w-full"
                     :disabled="count($cart) === 0">
                     Bayar
@@ -284,7 +283,7 @@
                         <flux:label>Jumlah Bayar</flux:label>
                         <flux:input wire:model.live="paymentAmount" type="number" step="0.01" />
                         <flux:error name="paymentAmount" />
-                        
+
                         <div class="grid grid-cols-3 gap-2 mt-3">
                             <flux:button type="button" wire:click="setExactAmount" variant="outline" size="sm">
                                 Pas
@@ -338,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
             clearTimeout(barcodeTimeout);
             barcodeBuffer += e.key;
-            
+
             // Set timeout to clear buffer (barcode scanners input fast)
             barcodeTimeout = setTimeout(() => {
                 if (barcodeBuffer.length > 3) {

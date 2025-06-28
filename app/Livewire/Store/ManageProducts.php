@@ -4,6 +4,7 @@ namespace App\Livewire\Store;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Store;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -50,7 +51,7 @@ class ManageProducts extends Component
 
     public function rules(): array
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $rules = [
             'name' => 'required|string|max:255',
@@ -75,7 +76,7 @@ class ManageProducts extends Component
     #[Computed]
     public function products()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $query = Product::with(['category'])
             ->byStore($currentStore->id)
@@ -105,7 +106,7 @@ class ManageProducts extends Component
     #[Computed]
     public function categories()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Category::byStore($currentStore->id)
             ->active()
@@ -116,13 +117,42 @@ class ManageProducts extends Component
     #[Computed]
     public function currentStore()
     {
-        return app('current_store');
+        return $this->getCurrentStore();
+    }
+
+    private function getCurrentStore()
+    {
+        // Try to get store from app instance first
+        try {
+            return app('current_store');
+        } catch (\Exception $e) {
+            // Fallback to getting from request attributes or user
+            $store = request()->attributes->get('current_store');
+            if ($store) {
+                return $store;
+            }
+
+            // Ultimate fallback: get user's store or first active store in tenant
+            $user = auth()->user();
+            if ($user->store_id) {
+                return Store::find($user->store_id);
+            }
+
+            // For Admin users, get first active store in their tenant
+            if ($user->tenant_id) {
+                return Store::where('tenant_id', $user->tenant_id)
+                    ->where('is_active', true)
+                    ->first();
+            }
+
+            throw new \Exception('No store context available');
+        }
     }
 
     #[Computed]
     public function lowStockCount()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Product::byStore($currentStore->id)->lowStock()->count();
     }
@@ -138,7 +168,7 @@ class ManageProducts extends Component
 
     public function edit($productId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $product = Product::byStore($currentStore->id)->findOrFail($productId);
         $this->editingProductId = $product->id;
@@ -158,7 +188,7 @@ class ManageProducts extends Component
     {
         $this->validate();
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $productData = [
             'store_id' => $currentStore->id,
@@ -203,7 +233,7 @@ class ManageProducts extends Component
             'stockNote' => 'required|string|max:255',
         ]);
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
         $product = Product::byStore($currentStore->id)->findOrFail($this->selectedProductId);
 
         $newStock = $product->stock + $this->stockAdjustment;
@@ -227,7 +257,7 @@ class ManageProducts extends Component
 
     public function delete($productId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $product = Product::byStore($currentStore->id)->findOrFail($productId);
 
@@ -247,7 +277,7 @@ class ManageProducts extends Component
 
     public function generateSku()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
         $prefix = strtoupper(substr($currentStore->name, 0, 3));
         $timestamp = now()->format('ymdHis');
         $this->sku = $prefix.'-'.$timestamp;

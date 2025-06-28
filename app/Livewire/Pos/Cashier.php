@@ -4,6 +4,7 @@ namespace App\Livewire\Pos;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +78,7 @@ class Cashier extends Component
             return collect();
         }
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Product::byStore($currentStore->id)
             ->active()
@@ -94,7 +95,7 @@ class Cashier extends Component
     #[Computed]
     public function customers()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Customer::byStore($currentStore->id)
             ->active()
@@ -109,7 +110,7 @@ class Cashier extends Component
             return null;
         }
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Customer::byStore($currentStore->id)->find($this->selectedCustomerId);
     }
@@ -117,12 +118,41 @@ class Cashier extends Component
     #[Computed]
     public function currentStore()
     {
-        return app('current_store');
+        return $this->getCurrentStore();
+    }
+
+    private function getCurrentStore()
+    {
+        // Try to get store from app instance first
+        try {
+            return app('current_store');
+        } catch (\Exception $e) {
+            // Fallback to getting from request attributes or user
+            $store = request()->attributes->get('current_store');
+            if ($store) {
+                return $store;
+            }
+
+            // Ultimate fallback: get user's store or first active store in tenant
+            $user = auth()->user();
+            if ($user->store_id) {
+                return Store::find($user->store_id);
+            }
+
+            // For Admin users, get first active store in their tenant
+            if ($user->tenant_id) {
+                return Store::where('tenant_id', $user->tenant_id)
+                    ->where('is_active', true)
+                    ->first();
+            }
+
+            throw new \Exception('No store context available');
+        }
     }
 
     public function addToCart($productId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
         $product = Product::byStore($currentStore->id)->find($productId);
 
         if (! $product || ! $product->is_active || $product->stock <= 0) {
@@ -159,7 +189,7 @@ class Cashier extends Component
 
     public function addProductByBarcode($barcode)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
         $product = Product::byStore($currentStore->id)
             ->where('sku', $barcode)
             ->active()
@@ -277,7 +307,7 @@ class Cashier extends Component
         try {
             DB::beginTransaction();
 
-            $currentStore = app('current_store');
+            $currentStore = $this->getCurrentStore();
 
             // Create transaction
             $transaction = Transaction::create([
@@ -348,7 +378,7 @@ class Cashier extends Component
             'newCustomerEmail' => 'nullable|email|max:255',
         ]);
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $customer = Customer::create([
             'store_id' => $currentStore->id,
@@ -386,7 +416,7 @@ class Cashier extends Component
 
     private function generateTransactionNumber()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
         $today = now()->format('Ymd');
         $prefix = 'TRX-'.$currentStore->id.'-';
 

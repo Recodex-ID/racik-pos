@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Models\Customer;
+use App\Models\Store;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -39,7 +40,7 @@ class ManageCustomers extends Component
 
     public function rules(): array
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $rules = [
             'name' => 'required|string|max:255',
@@ -60,7 +61,7 @@ class ManageCustomers extends Component
     #[Computed]
     public function customers()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $query = Customer::byStore($currentStore->id)
             ->when($this->search, function ($query) {
@@ -95,7 +96,7 @@ class ManageCustomers extends Component
             return null;
         }
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Customer::byStore($currentStore->id)
             ->withCount('transactions')
@@ -109,7 +110,7 @@ class ManageCustomers extends Component
     #[Computed]
     public function customerStats()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return [
             'total' => Customer::byStore($currentStore->id)->count(),
@@ -124,7 +125,36 @@ class ManageCustomers extends Component
     #[Computed]
     public function currentStore()
     {
-        return app('current_store');
+        return $this->getCurrentStore();
+    }
+
+    private function getCurrentStore()
+    {
+        // Try to get store from app instance first
+        try {
+            return app('current_store');
+        } catch (\Exception $e) {
+            // Fallback to getting from request attributes or user
+            $store = request()->attributes->get('current_store');
+            if ($store) {
+                return $store;
+            }
+
+            // Ultimate fallback: get user's store or first active store in tenant
+            $user = auth()->user();
+            if ($user->store_id) {
+                return Store::find($user->store_id);
+            }
+
+            // For Admin users, get first active store in their tenant
+            if ($user->tenant_id) {
+                return Store::where('tenant_id', $user->tenant_id)
+                    ->where('is_active', true)
+                    ->first();
+            }
+
+            throw new \Exception('No store context available');
+        }
     }
 
     public function create()
@@ -136,7 +166,7 @@ class ManageCustomers extends Component
 
     public function edit($customerId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
         $this->editingCustomerId = $customer->id;
@@ -152,7 +182,7 @@ class ManageCustomers extends Component
     {
         $this->validate();
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $customerData = [
             'store_id' => $currentStore->id,
@@ -186,7 +216,7 @@ class ManageCustomers extends Component
 
     public function delete($customerId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
 
@@ -206,7 +236,7 @@ class ManageCustomers extends Component
 
     public function toggleStatus($customerId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
         $customer->update(['is_active' => ! $customer->is_active]);

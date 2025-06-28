@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Models\Category;
+use App\Models\Store;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -35,7 +36,7 @@ class ManageCategories extends Component
     #[Computed]
     public function categories()
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         return Category::byStore($currentStore->id)
             ->when($this->search, function ($query) {
@@ -50,7 +51,36 @@ class ManageCategories extends Component
     #[Computed]
     public function currentStore()
     {
-        return app('current_store');
+        return $this->getCurrentStore();
+    }
+
+    private function getCurrentStore()
+    {
+        // Try to get store from app instance first
+        try {
+            return app('current_store');
+        } catch (\Exception $e) {
+            // Fallback to getting from request attributes or user
+            $store = request()->attributes->get('current_store');
+            if ($store) {
+                return $store;
+            }
+
+            // Ultimate fallback: get user's store or first active store in tenant
+            $user = auth()->user();
+            if ($user->store_id) {
+                return Store::find($user->store_id);
+            }
+
+            // For Admin users, get first active store in their tenant
+            if ($user->tenant_id) {
+                return Store::where('tenant_id', $user->tenant_id)
+                    ->where('is_active', true)
+                    ->first();
+            }
+
+            throw new \Exception('No store context available');
+        }
     }
 
     public function create()
@@ -62,7 +92,7 @@ class ManageCategories extends Component
 
     public function edit($categoryId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $category = Category::byStore($currentStore->id)->findOrFail($categoryId);
         $this->editingCategoryId = $category->id;
@@ -76,7 +106,7 @@ class ManageCategories extends Component
     {
         $this->validate();
 
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $categoryData = [
             'store_id' => $currentStore->id,
@@ -102,7 +132,7 @@ class ManageCategories extends Component
 
     public function delete($categoryId)
     {
-        $currentStore = app('current_store');
+        $currentStore = $this->getCurrentStore();
 
         $category = Category::byStore($currentStore->id)->findOrFail($categoryId);
 
