@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     // Store Management Routes (untuk staff toko)
     Route::middleware(['store.context'])->prefix('store')->name('store.')->group(function () {
         Route::get('/categories', \App\Livewire\Store\ManageCategories::class)->name('categories');
+        Route::get('/products', \App\Livewire\Store\ManageProducts::class)->name('products');
     });
 
     Route::redirect('settings', 'settings/profile');

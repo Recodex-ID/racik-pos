@@ -29,6 +29,7 @@
                 @hasrole('Admin|Store Manager|Cashier')
                 <flux:navlist.group :heading="__('Toko')" class="grid">
                     <flux:navlist.item icon="folder" :href="route('store.categories')" :current="request()->routeIs('store.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
+                    <flux:navlist.item icon="cube" :href="route('store.products')" :current="request()->routeIs('store.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole
             </flux:navlist>
