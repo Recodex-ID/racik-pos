@@ -22,14 +22,14 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Store Management Routes (untuk staff toko)
-    Route::middleware(['role:Admin', 'store.context'])->prefix('store')->name('store.')->group(function () {
+    Route::middleware(['role:Admin'])->prefix('store')->name('store.')->group(function () {
         Route::get('/categories', \App\Livewire\Store\ManageCategories::class)->name('categories');
         Route::get('/products', \App\Livewire\Store\ManageProducts::class)->name('products');
         Route::get('/customers', \App\Livewire\Store\ManageCustomers::class)->name('customers');
     });
 
     // POS Routes (untuk kasir)
-    Route::middleware(['role:Admin|User', 'store.context'])->prefix('pos')->name('pos.')->group(function () {
+    Route::middleware(['role:Admin|User'])->prefix('pos')->name('pos.')->group(function () {
         Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
     });
 
