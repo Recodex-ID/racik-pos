@@ -26,6 +26,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Username</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Tenant</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Roles</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Created</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Actions</th>
@@ -37,6 +38,15 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $user->name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user->username }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user->email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            @if($user->tenant)
+                                <flux:badge variant="primary" size="sm">
+                                    {{ $user->tenant->name }}
+                                </flux:badge>
+                            @else
+                                <span class="text-zinc-400">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
                             @foreach ($user->roles as $role)
                                 <flux:badge variant="primary" size="sm" class="mr-1">
@@ -58,7 +68,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-zinc-500 dark:text-zinc-400">
+                        <td colspan="7" class="px-6 py-4 text-center text-zinc-500 dark:text-zinc-400">
                             No users found
                         </td>
                     </tr>
@@ -112,6 +122,20 @@
                             Leave empty if you don't want to change
                         </flux:description>
                     @endif
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Tenant</flux:label>
+                    <flux:select wire:model="tenant_id" placeholder="Pilih Tenant (Opsional)">
+                        <option value="">Tidak ada tenant (Super Admin)</option>
+                        @foreach ($this->tenants as $tenant)
+                            <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="tenant_id" />
+                    <flux:description>
+                        Pilih tenant untuk user ini. Kosongkan jika Super Admin.
+                    </flux:description>
                 </flux:field>
 
                 <flux:field>

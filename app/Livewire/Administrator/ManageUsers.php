@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Administrator;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Computed;
@@ -23,6 +24,8 @@ class ManageUsers extends Component
 
     public $selectedRoles = [];
 
+    public $tenant_id = '';
+
     public $editingUserId = null;
 
     public $showModal = false;
@@ -36,6 +39,7 @@ class ManageUsers extends Component
             'username' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'selectedRoles' => 'array',
+            'tenant_id' => 'nullable|exists:tenants,id',
         ];
 
         if ($this->editingUserId) {
@@ -54,7 +58,7 @@ class ManageUsers extends Component
     #[Computed]
     public function users()
     {
-        return User::with('roles')
+        return User::with(['roles', 'tenant'])
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%')
                     ->orWhere('username', 'like', '%'.$this->search.'%')
@@ -70,9 +74,15 @@ class ManageUsers extends Component
         return Role::all();
     }
 
+    #[Computed]
+    public function tenants()
+    {
+        return Tenant::active()->orderBy('name')->get();
+    }
+
     public function create()
     {
-        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'editingUserId']);
+        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'tenant_id', 'editingUserId']);
         $this->showModal = true;
     }
 
@@ -85,6 +95,7 @@ class ManageUsers extends Component
         $this->email = $user->email;
         $this->password = '';
         $this->selectedRoles = $user->roles->pluck('name')->toArray();
+        $this->tenant_id = $user->tenant_id;
         $this->showModal = true;
     }
 
@@ -96,6 +107,7 @@ class ManageUsers extends Component
             'name' => $this->name,
             'username' => $this->username,
             'email' => $this->email,
+            'tenant_id' => $this->tenant_id ?: null,
         ];
 
         if ($this->password) {
@@ -111,9 +123,9 @@ class ManageUsers extends Component
 
         $user->syncRoles($this->selectedRoles);
 
-        $message = $this->editingUserId ? 'User successfully updated!' : 'User successfully created!';
+        $message = $this->editingUserId ? 'User berhasil diperbarui!' : 'User berhasil dibuat!';
 
-        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'editingUserId']);
+        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'tenant_id', 'editingUserId']);
         $this->showModal = false;
 
         session()->flash('message', $message);
@@ -122,7 +134,7 @@ class ManageUsers extends Component
     public function delete($userId)
     {
         User::findOrFail($userId)->delete();
-        session()->flash('message', 'User successfully deleted!');
+        session()->flash('message', 'User berhasil dihapus!');
 
         // Close the confirmation modal after delete
         $this->modal("delete-user-{$userId}")->close();
@@ -130,7 +142,7 @@ class ManageUsers extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'editingUserId']);
+        $this->reset(['name', 'username', 'email', 'password', 'selectedRoles', 'tenant_id', 'editingUserId']);
         $this->resetValidation();
     }
 
