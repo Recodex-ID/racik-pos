@@ -21,12 +21,29 @@ class StoreContext
             return redirect()->route('login');
         }
 
-        // Super Admin dapat mengakses semua store
+        // Super Admin dapat mengakses semua store tanpa store context
         if ($user->hasRole('Super Admin')) {
             return $next($request);
         }
 
-        // User harus memiliki store_id
+        // Admin dengan tenant_id bisa mengakses store pertama dari tenant mereka
+        if ($user->hasRole('Admin') && $user->tenant_id) {
+            $store = Store::where('tenant_id', $user->tenant_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $store) {
+                abort(403, 'Tidak ada toko aktif untuk tenant ini.');
+            }
+
+            // Simpan store context untuk digunakan di aplikasi
+            $request->attributes->set('current_store', $store);
+            app()->instance('current_store', $store);
+
+            return $next($request);
+        }
+
+        // User lain harus memiliki store_id spesifik
         if (! $user->store_id) {
             abort(403, 'User tidak memiliki akses ke toko manapun.');
         }
