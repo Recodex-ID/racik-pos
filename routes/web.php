@@ -26,6 +26,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/categories', \App\Livewire\Store\ManageCategories::class)->name('categories');
         Route::get('/products', \App\Livewire\Store\ManageProducts::class)->name('products');
         Route::get('/customers', \App\Livewire\Store\ManageCustomers::class)->name('customers');
+        Route::get('/transactions', \App\Livewire\Store\ManageTransactions::class)->name('transactions');
+        Route::get('/sales-reports', \App\Livewire\Store\SalesReports::class)->name('sales-reports');
+        Route::get('/inventory-reports', \App\Livewire\Store\InventoryReports::class)->name('inventory-reports');
     });
 
     // POS Routes (untuk kasir)

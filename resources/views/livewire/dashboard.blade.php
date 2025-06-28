@@ -175,6 +175,106 @@
         </div>
     </div>
 
+    <!-- Today's Sales Report Section -->
+    <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Laporan Penjualan Hari Ini</h3>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ now()->format('d F Y') }}</p>
+            </div>
+            <div class="rounded-full bg-blue-100 p-3 dark:bg-blue-900/20">
+                <flux:icon.chart-bar-square class="h-6 w-6 text-blue-600" />
+            </div>
+        </div>
+
+        <!-- Today's Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-blue-600 dark:text-blue-400">Transaksi Hari Ini</h4>
+                        <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ number_format($this->todayTransactions) }}</p>
+                    </div>
+                    <div class="rounded-full bg-blue-200 p-2 dark:bg-blue-800">
+                        <flux:icon.credit-card class="h-5 w-5 text-blue-600" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-green-600 dark:text-green-400">Penjualan Hari Ini</h4>
+                        <p class="text-2xl font-bold text-green-900 dark:text-green-100">Rp {{ number_format($this->todaySales, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="rounded-full bg-green-200 p-2 dark:bg-green-800">
+                        <flux:icon.banknotes class="h-5 w-5 text-green-600" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Charts and Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Payment Methods Today -->
+            <div>
+                <h4 class="text-md font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Metode Pembayaran Hari Ini</h4>
+                @if(count($this->todayPaymentMethods['labels']) > 0)
+                    <div class="space-y-3">
+                        @foreach($this->todayPaymentMethods['labels'] as $index => $method)
+                            <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    @php
+                                        $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-red-500'];
+                                        $color = $colors[$index % count($colors)];
+                                    @endphp
+                                    <div class="w-3 h-3 rounded-full {{ $color }}"></div>
+                                    <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $method }}</span>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Rp {{ number_format($this->todayPaymentMethods['data'][$index], 0, ',', '.') }}</p>
+                                    <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ $this->todayPaymentMethods['counts'][$index] }} transaksi</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <flux:icon.chart-pie class="mx-auto h-12 w-12 text-zinc-400" />
+                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Belum ada transaksi hari ini</p>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Top Products Today -->
+            <div>
+                <h4 class="text-md font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Produk Terlaris Hari Ini</h4>
+                @forelse($this->todayTopProducts as $index => $product)
+                    <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg mb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center justify-center h-8 w-8 bg-yellow-100 rounded-full text-xs font-medium text-yellow-800">
+                                {{ $index + 1 }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</p>
+                                <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ $product->sku }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold text-green-600">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</p>
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ $product->total_qty }} terjual</p>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-8">
+                        <flux:icon.cube class="mx-auto h-12 w-12 text-zinc-400" />
+                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Belum ada penjualan produk hari ini</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Section - Sales Reports -->
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">

@@ -38,6 +38,12 @@
                     <flux:navlist.item icon="cube" :href="route('store.products')" :current="request()->routeIs('store.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('store.customers')" :current="request()->routeIs('store.customers')" wire:navigate>Pelanggan</flux:navlist.item>
                 </flux:navlist.group>
+
+                <flux:navlist.group :heading="__('Laporan')" class="grid">
+                    <flux:navlist.item icon="document-text" :href="route('store.transactions')" :current="request()->routeIs('store.transactions')" wire:navigate>History & Report Transaksi</flux:navlist.item>
+                    <flux:navlist.item icon="chart-bar" :href="route('store.sales-reports')" :current="request()->routeIs('store.sales-reports')" wire:navigate>Laporan Penjualan</flux:navlist.item>
+                    <flux:navlist.item icon="cube-transparent" :href="route('store.inventory-reports')" :current="request()->routeIs('store.inventory-reports')" wire:navigate>Laporan Stok</flux:navlist.item>
+                </flux:navlist.group>
                 @endhasrole
             </flux:navlist>
 

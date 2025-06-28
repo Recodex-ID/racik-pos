@@ -85,6 +85,22 @@ class Dashboard extends Component
     }
 
     #[Computed]
+    public function todaySales()
+    {
+        return Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today())
+            ->sum('total_amount');
+    }
+
+    #[Computed]
+    public function todayTransactions()
+    {
+        return Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today())
+            ->count();
+    }
+
+    #[Computed]
     public function totalProducts()
     {
         return Product::count();
@@ -156,6 +172,40 @@ class Dashboard extends Component
             ->orderBy('stock', 'asc')
             ->take(5)
             ->get();
+    }
+
+    #[Computed]
+    public function todayTopProducts()
+    {
+        return Transaction::where('transactions.status', 'completed')
+            ->whereDate('transactions.transaction_date', today())
+            ->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
+            ->join('products', 'transaction_items.product_id', '=', 'products.id')
+            ->selectRaw('products.name, products.sku, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
+            ->groupBy('products.id', 'products.name', 'products.sku')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get();
+    }
+
+    #[Computed]
+    public function todayPaymentMethods()
+    {
+        $paymentMethods = Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today())
+            ->selectRaw('payment_method, SUM(total_amount) as total, COUNT(*) as count')
+            ->groupBy('payment_method')
+            ->get();
+
+        return [
+            'labels' => $paymentMethods->pluck('payment_method')->map(function($method) {
+                return ucfirst($method);
+            })->toArray(),
+            'data' => $paymentMethods->pluck('total')->map(function($total) {
+                return floatval($total);
+            })->toArray(),
+            'counts' => $paymentMethods->pluck('count')->toArray(),
+        ];
     }
 
     public function render()
