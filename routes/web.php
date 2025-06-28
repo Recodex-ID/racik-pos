@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', \App\Livewire\Administrator\ManageUsers::class)->name('users');
         Route::get('/roles', \App\Livewire\Administrator\ManageRoles::class)->name('roles');
         Route::get('/permissions', \App\Livewire\Administrator\ManagePermissions::class)->name('permissions');
+        Route::get('/tenants', \App\Livewire\Administrator\ManageTenants::class)->name('tenants');
     });
 
     Route::redirect('settings', 'settings/profile');

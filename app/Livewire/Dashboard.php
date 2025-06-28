@@ -6,13 +6,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class Dashboard extends Component
 {
-    use WithPagination;
 
     #[Computed]
     public function totalUsers()
@@ -47,7 +45,7 @@ class Dashboard extends Component
     #[Computed]
     public function recentUsers()
     {
-        return User::latest()->paginate(5, pageName: 'recentUsersPage');
+        return User::latest()->take(5)->get();
     }
 
     #[Computed]

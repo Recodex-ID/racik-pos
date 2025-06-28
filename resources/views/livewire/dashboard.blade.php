@@ -85,10 +85,6 @@
                     </div>
                 @endforeach
             </div>
-
-            <div class="mt-4">
-                {{ $this->recentUsers->links('custom.pagination') }}
-            </div>
         </div>
 
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
