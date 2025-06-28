@@ -25,6 +25,12 @@
                     <flux:navlist.item icon="building-storefront" :href="route('admin.stores')" :current="request()->routeIs('admin.stores')" wire:navigate>Manage Stores</flux:navlist.item>
                 </flux:navlist.group>
                 @endrole
+
+                @hasrole('Admin|Store Manager|Cashier')
+                <flux:navlist.group :heading="__('Toko')" class="grid">
+                    <flux:navlist.item icon="folder" :href="route('store.categories')" :current="request()->routeIs('store.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
+                </flux:navlist.group>
+                @endhasrole
             </flux:navlist>
 
             <flux:spacer />

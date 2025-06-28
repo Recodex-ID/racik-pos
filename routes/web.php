@@ -21,6 +21,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stores', \App\Livewire\Administrator\ManageStores::class)->name('stores');
     });
 
+    // Store Management Routes (untuk staff toko)
+    Route::middleware(['store.context'])->prefix('store')->name('store.')->group(function () {
+        Route::get('/categories', \App\Livewire\Store\ManageCategories::class)->name('categories');
+    });
+
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
