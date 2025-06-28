@@ -44,26 +44,54 @@
                     class="text-lg"
                     autofocus
                 />
+            </div>
 
-                <!-- Product Search Results -->
+            <!-- Product Cards - Scrollable -->
+            <div class="flex-1 bg-zinc-50 dark:bg-zinc-900 overflow-y-auto p-6">
                 @if($this->products->count() > 0)
-                    <div class="mt-4 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         @foreach($this->products as $product)
                             <div wire:click="addToCart({{ $product->id }})"
-                                 class="flex items-center justify-between p-3 hover:bg-zinc-50 dark:hover:bg-zinc-700 cursor-pointer border-b border-zinc-100 dark:border-zinc-600 last:border-b-0">
-                                <div class="flex-1">
-                                    <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</div>
-                                    <div class="text-sm text-zinc-500 dark:text-zinc-400">
-                                        {{ $product->sku }} | {{ $product->category->name }} | Stok: {{ $product->stock }}
+                                 class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 cursor-pointer transition-all duration-200 transform hover:scale-105">
+                                <div class="flex flex-col h-full">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm leading-tight">{{ $product->name }}</h3>
+                                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">{{ $product->category->name }}</p>
+                                        <div class="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-300 mb-3">
+                                            <span>{{ $product->sku }}</span>
+                                            <span class="flex items-center bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">
+                                                <flux:icon name="cube" class="w-3 h-3 mr-1" />
+                                                {{ $product->stock }}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-lg text-zinc-900 dark:text-zinc-100">
-                                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                                    <div class="text-center mt-2">
+                                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                        </div>
+                                        <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                                            Klik untuk tambah ke keranjang
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                @else
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-zinc-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <flux:icon name="cube" class="w-10 h-10 text-zinc-400" />
+                            </div>
+                            <h3 class="font-medium text-zinc-900 dark:text-zinc-100 mb-2">Tidak ada produk</h3>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                @if(strlen($this->productSearch) > 0)
+                                    Tidak ditemukan produk yang sesuai dengan pencarian "{{ $this->productSearch }}"
+                                @else
+                                    Belum ada produk tersedia di toko ini
+                                @endif
+                            </p>
+                        </div>
                     </div>
                 @endif
             </div>

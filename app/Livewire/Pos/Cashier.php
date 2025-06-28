@@ -74,21 +74,23 @@ class Cashier extends Component
     #[Computed]
     public function products()
     {
-        if (strlen($this->productSearch) < 2) {
-            return collect();
-        }
-
         $currentStore = $this->getCurrentStore();
 
-        return Product::byStore($currentStore->id)
+        $query = Product::byStore($currentStore->id)
             ->active()
-            ->where(function ($query) {
-                $query->where('name', 'like', '%'.$this->productSearch.'%')
-                    ->orWhere('sku', 'like', '%'.$this->productSearch.'%');
-            })
             ->where('stock', '>', 0)
-            ->with('category')
-            ->limit(10)
+            ->with('category');
+
+        // Jika ada pencarian, filter berdasarkan pencarian
+        if (strlen($this->productSearch) > 0) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%'.$this->productSearch.'%')
+                    ->orWhere('sku', 'like', '%'.$this->productSearch.'%');
+            });
+        }
+
+        return $query->orderBy('name')
+            ->limit(20)
             ->get();
     }
 
