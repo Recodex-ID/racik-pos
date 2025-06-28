@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\TransactionItem;
-use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Illuminate\Database\Seeder;
 
 class TransactionItemSeeder extends Seeder

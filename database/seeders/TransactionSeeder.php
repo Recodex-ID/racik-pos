@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Transaction;
-use App\Models\Store;
 use App\Models\Customer;
+use App\Models\Store;
+use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class TransactionSeeder extends Seeder
 {
@@ -41,7 +41,7 @@ class TransactionSeeder extends Seeder
                     'store_id' => $store->id,
                     'customer_id' => $customer->id,
                     'user_id' => $user->id,
-                    'transaction_number' => 'TRX-' . $store->id . '-' . str_pad($i, 4, '0', STR_PAD_LEFT) . '-' . $transactionDate->format('Ymd'),
+                    'transaction_number' => 'TRX-'.$store->id.'-'.str_pad($i, 4, '0', STR_PAD_LEFT).'-'.$transactionDate->format('Ymd'),
                     'transaction_date' => $transactionDate,
                     'subtotal' => $subtotal,
                     'discount_amount' => $discountAmount,
@@ -51,7 +51,7 @@ class TransactionSeeder extends Seeder
                     'payment_amount' => $paymentAmount,
                     'change_amount' => $changeAmount,
                     'status' => 'completed',
-                    'notes' => 'Transaksi contoh untuk ' . $store->name,
+                    'notes' => 'Transaksi contoh untuk '.$store->name,
                 ]);
             }
         }

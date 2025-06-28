@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Database\Seeder;
 
@@ -25,7 +25,7 @@ class ProductSeeder extends Seeder
                         'category_id' => $category->id,
                         'name' => $productData['name'],
                         'description' => $productData['description'],
-                        'sku' => $store->id . '-' . strtoupper(substr($productData['name'], 0, 3)) . '-' . rand(1000, 9999),
+                        'sku' => $store->id.'-'.strtoupper(substr($productData['name'], 0, 3)).'-'.rand(1000, 9999),
                         'price' => $productData['price'],
                         'cost' => $productData['cost'],
                         'stock' => rand(10, 100),
@@ -61,7 +61,7 @@ class ProductSeeder extends Seeder
         ];
 
         return $products[$categoryName] ?? [
-            ['name' => 'Produk Default', 'description' => 'Produk default untuk kategori ' . $categoryName, 'price' => 10000, 'cost' => 7000]
+            ['name' => 'Produk Default', 'description' => 'Produk default untuk kategori '.$categoryName, 'price' => 10000, 'cost' => 7000],
         ];
     }
 }

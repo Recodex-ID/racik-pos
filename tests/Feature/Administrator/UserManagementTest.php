@@ -52,7 +52,7 @@ class UserManagementTest extends TestCase
         $this->assertDatabaseHas('users', [
             'name' => 'Test User',
             'username' => 'testuser',
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $user = User::where('email', 'test@example.com')->first();
@@ -70,7 +70,7 @@ class UserManagementTest extends TestCase
         $user = User::factory()->create([
             'name' => 'Original Name',
             'username' => 'originaluser',
-            'email' => 'original@example.com'
+            'email' => 'original@example.com',
         ]);
         $user->assignRole(['admin', 'user']);
 
@@ -88,14 +88,13 @@ class UserManagementTest extends TestCase
             ->set('email', 'updated@example.com')
             ->set('selectedRoles', ['user', 'manager'])
             ->call('save')
-            ->assertHasNoErrors()
-;
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'name' => 'Updated Name',
             'username' => 'updateduser',
-            'email' => 'updated@example.com'
+            'email' => 'updated@example.com',
         ]);
 
         $user->refresh();
@@ -107,7 +106,7 @@ class UserManagementTest extends TestCase
     public function test_can_edit_user_password()
     {
         $user = User::factory()->create([
-            'password' => Hash::make('oldpassword')
+            'password' => Hash::make('oldpassword'),
         ]);
 
         Livewire::test(ManageUsers::class)
@@ -124,7 +123,7 @@ class UserManagementTest extends TestCase
     {
         $originalPassword = Hash::make('originalpassword');
         $user = User::factory()->create([
-            'password' => $originalPassword
+            'password' => $originalPassword,
         ]);
 
         Livewire::test(ManageUsers::class)
@@ -143,11 +142,10 @@ class UserManagementTest extends TestCase
         $user = User::factory()->create();
 
         Livewire::test(ManageUsers::class)
-            ->call('delete', $user->id)
-;
+            ->call('delete', $user->id);
 
         $this->assertDatabaseMissing('users', [
-            'id' => $user->id
+            'id' => $user->id,
         ]);
     }
 
@@ -163,7 +161,7 @@ class UserManagementTest extends TestCase
                 'name' => 'required',
                 'username' => 'required',
                 'email' => 'required',
-                'password' => 'required'
+                'password' => 'required',
             ]);
     }
 
@@ -171,7 +169,7 @@ class UserManagementTest extends TestCase
     {
         User::factory()->create([
             'username' => 'existinguser',
-            'email' => 'existing@example.com'
+            'email' => 'existing@example.com',
         ]);
 
         Livewire::test(ManageUsers::class)
@@ -182,7 +180,7 @@ class UserManagementTest extends TestCase
             ->call('save')
             ->assertHasErrors([
                 'username' => 'unique',
-                'email' => 'unique'
+                'email' => 'unique',
             ]);
     }
 
@@ -300,13 +298,12 @@ class UserManagementTest extends TestCase
             ->set('password', 'password123')
             ->set('selectedRoles', [])
             ->call('save')
-            ->assertHasNoErrors()
-;
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', [
             'name' => 'No Role User',
             'username' => 'noroleuser',
-            'email' => 'norole@example.com'
+            'email' => 'norole@example.com',
         ]);
 
         $user = User::where('email', 'norole@example.com')->first();

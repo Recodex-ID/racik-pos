@@ -12,8 +12,11 @@ class ManagePermissions extends Component
     use WithPagination;
 
     public $name = '';
+
     public $editingPermissionId = null;
+
     public $showModal = false;
+
     public $search = '';
 
     public function rules(): array
@@ -23,7 +26,7 @@ class ManagePermissions extends Component
         ];
 
         if ($this->editingPermissionId) {
-            $rules['name'] .= '|unique:permissions,name,' . $this->editingPermissionId;
+            $rules['name'] .= '|unique:permissions,name,'.$this->editingPermissionId;
         } else {
             $rules['name'] .= '|unique:permissions,name';
         }
@@ -35,8 +38,8 @@ class ManagePermissions extends Component
     public function permissions()
     {
         return Permission::when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
-            })
+            $query->where('name', 'like', '%'.$this->search.'%');
+        })
             ->latest()
             ->paginate(10);
     }

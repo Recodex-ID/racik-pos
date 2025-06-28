@@ -11,7 +11,6 @@ use Spatie\Permission\Models\Role;
 
 class Dashboard extends Component
 {
-
     #[Computed]
     public function totalUsers()
     {
@@ -66,7 +65,7 @@ class Dashboard extends Component
 
         return [
             'labels' => $last7Days,
-            'data' => $userCounts
+            'data' => $userCounts,
         ];
     }
 

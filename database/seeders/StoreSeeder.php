@@ -15,7 +15,7 @@ class StoreSeeder extends Seeder
         foreach ($tenants as $tenant) {
             Store::create([
                 'tenant_id' => $tenant->id,
-                'name' => $tenant->name . ' - Cabang Utama',
+                'name' => $tenant->name.' - Cabang Utama',
                 'address' => $tenant->address,
                 'phone' => $tenant->phone,
                 'is_active' => true,
@@ -24,7 +24,7 @@ class StoreSeeder extends Seeder
             if ($tenant->id === 1) {
                 Store::create([
                     'tenant_id' => $tenant->id,
-                    'name' => $tenant->name . ' - Cabang Kelapa Gading',
+                    'name' => $tenant->name.' - Cabang Kelapa Gading',
                     'address' => 'Jl. Boulevard Raya No. 45, Kelapa Gading',
                     'phone' => '021-45566778',
                     'is_active' => true,

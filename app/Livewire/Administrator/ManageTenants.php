@@ -12,12 +12,19 @@ class ManageTenants extends Component
     use WithPagination;
 
     public $name = '';
+
     public $email = '';
+
     public $phone = '';
+
     public $address = '';
+
     public $is_active = true;
+
     public $editingTenantId = null;
+
     public $showModal = false;
+
     public $search = '';
 
     public function rules(): array
@@ -31,7 +38,7 @@ class ManageTenants extends Component
         ];
 
         if ($this->editingTenantId) {
-            $rules['email'] .= '|unique:tenants,email,' . $this->editingTenantId;
+            $rules['email'] .= '|unique:tenants,email,'.$this->editingTenantId;
         } else {
             $rules['email'] .= '|unique:tenants,email';
         }
@@ -43,10 +50,10 @@ class ManageTenants extends Component
     public function tenants()
     {
         return Tenant::when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%')
-                      ->orWhere('phone', 'like', '%' . $this->search . '%');
-            })
+            $query->where('name', 'like', '%'.$this->search.'%')
+                ->orWhere('email', 'like', '%'.$this->search.'%')
+                ->orWhere('phone', 'like', '%'.$this->search.'%');
+        })
             ->latest()
             ->paginate(10);
     }

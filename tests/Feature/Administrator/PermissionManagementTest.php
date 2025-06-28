@@ -38,7 +38,7 @@ class PermissionManagementTest extends TestCase
             ->assertSet('showModal', false);
 
         $this->assertDatabaseHas('permissions', [
-            'name' => 'test-permission'
+            'name' => 'test-permission',
         ]);
     }
 
@@ -53,12 +53,11 @@ class PermissionManagementTest extends TestCase
             ->assertSet('showModal', true)
             ->set('name', 'updated-permission')
             ->call('save')
-            ->assertHasNoErrors()
-;
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('permissions', [
             'id' => $permission->id,
-            'name' => 'updated-permission'
+            'name' => 'updated-permission',
         ]);
     }
 
@@ -67,11 +66,10 @@ class PermissionManagementTest extends TestCase
         $permission = Permission::create(['name' => 'delete-permission']);
 
         Livewire::test(ManagePermissions::class)
-            ->call('delete', $permission->id)
-;
+            ->call('delete', $permission->id);
 
         $this->assertDatabaseMissing('permissions', [
-            'id' => $permission->id
+            'id' => $permission->id,
         ]);
     }
 

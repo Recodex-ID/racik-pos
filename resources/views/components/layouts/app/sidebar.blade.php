@@ -22,6 +22,7 @@
                     <flux:navlist.item icon="shield-check" :href="route('admin.roles')" :current="request()->routeIs('admin.roles')" wire:navigate>Manage Roles</flux:navlist.item>
                     <flux:navlist.item icon="key" :href="route('admin.permissions')" :current="request()->routeIs('admin.permissions')" wire:navigate>Manage Permissions</flux:navlist.item>
                     <flux:navlist.item icon="building-office" :href="route('admin.tenants')" :current="request()->routeIs('admin.tenants')" wire:navigate>Manage Tenants</flux:navlist.item>
+                    <flux:navlist.item icon="building-storefront" :href="route('admin.stores')" :current="request()->routeIs('admin.stores')" wire:navigate>Manage Stores</flux:navlist.item>
                 </flux:navlist.group>
                 @endrole
             </flux:navlist>

@@ -13,9 +13,13 @@ class ManageRoles extends Component
     use WithPagination;
 
     public $name = '';
+
     public $selectedPermissions = [];
+
     public $editingRoleId = null;
+
     public $showModal = false;
+
     public $search = '';
 
     public function rules(): array
@@ -26,7 +30,7 @@ class ManageRoles extends Component
         ];
 
         if ($this->editingRoleId) {
-            $rules['name'] .= '|unique:roles,name,' . $this->editingRoleId;
+            $rules['name'] .= '|unique:roles,name,'.$this->editingRoleId;
         } else {
             $rules['name'] .= '|unique:roles,name';
         }
@@ -39,7 +43,7 @@ class ManageRoles extends Component
     {
         return Role::with('permissions')
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->latest()
             ->paginate(10);

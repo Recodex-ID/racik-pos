@@ -14,12 +14,19 @@ class ManageUsers extends Component
     use WithPagination;
 
     public $name = '';
+
     public $username = '';
+
     public $email = '';
+
     public $password = '';
+
     public $selectedRoles = [];
+
     public $editingUserId = null;
+
     public $showModal = false;
+
     public $search = '';
 
     public function rules(): array
@@ -32,8 +39,8 @@ class ManageUsers extends Component
         ];
 
         if ($this->editingUserId) {
-            $rules['username'] .= '|unique:users,username,' . $this->editingUserId;
-            $rules['email'] .= '|unique:users,email,' . $this->editingUserId;
+            $rules['username'] .= '|unique:users,username,'.$this->editingUserId;
+            $rules['email'] .= '|unique:users,email,'.$this->editingUserId;
             $rules['password'] = 'nullable|string|min:8';
         } else {
             $rules['username'] .= '|unique:users,username';
@@ -49,9 +56,9 @@ class ManageUsers extends Component
     {
         return User::with('roles')
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('username', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('username', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
             })
             ->latest()
             ->paginate(10);

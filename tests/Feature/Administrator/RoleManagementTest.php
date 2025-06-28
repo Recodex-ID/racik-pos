@@ -44,7 +44,7 @@ class RoleManagementTest extends TestCase
             ->assertSet('showModal', false);
 
         $this->assertDatabaseHas('roles', [
-            'name' => 'test-role'
+            'name' => 'test-role',
         ]);
 
         $role = Role::where('name', 'test-role')->first();
@@ -70,12 +70,11 @@ class RoleManagementTest extends TestCase
             ->set('name', 'updated-role')
             ->set('selectedPermissions', ['permission-2', 'permission-3'])
             ->call('save')
-            ->assertHasNoErrors()
-;
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('roles', [
             'id' => $role->id,
-            'name' => 'updated-role'
+            'name' => 'updated-role',
         ]);
 
         $role->refresh();
@@ -89,11 +88,10 @@ class RoleManagementTest extends TestCase
         $role = Role::create(['name' => 'delete-role']);
 
         Livewire::test(ManageRoles::class)
-            ->call('delete', $role->id)
-;
+            ->call('delete', $role->id);
 
         $this->assertDatabaseMissing('roles', [
-            'id' => $role->id
+            'id' => $role->id,
         ]);
     }
 
@@ -170,11 +168,10 @@ class RoleManagementTest extends TestCase
             ->set('name', 'no-permission-role')
             ->set('selectedPermissions', [])
             ->call('save')
-            ->assertHasNoErrors()
-;
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('roles', [
-            'name' => 'no-permission-role'
+            'name' => 'no-permission-role',
         ]);
 
         $role = Role::where('name', 'no-permission-role')->first();

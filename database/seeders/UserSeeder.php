@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Store;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,9 +17,9 @@ class UserSeeder extends Seeder
         foreach ($tenants as $tenant) {
             // Buat Admin untuk setiap tenant
             $admin = User::create([
-                'name' => 'Admin ' . $tenant->name,
-                'username' => 'admin' . $tenant->id,
-                'email' => 'admin' . $tenant->id . '@' . strtolower(str_replace(' ', '', $tenant->name)) . '.com',
+                'name' => 'Admin '.$tenant->name,
+                'username' => 'admin'.$tenant->id,
+                'email' => 'admin'.$tenant->id.'@'.strtolower(str_replace(' ', '', $tenant->name)).'.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
                 'tenant_id' => $tenant->id,
@@ -34,9 +34,9 @@ class UserSeeder extends Seeder
             foreach ($stores as $store) {
                 // Kasir 1
                 $cashier1 = User::create([
-                    'name' => 'Kasir 1 ' . $store->name,
-                    'username' => 'kasir1store' . $store->id,
-                    'email' => 'kasir1@store' . $store->id . '.com',
+                    'name' => 'Kasir 1 '.$store->name,
+                    'username' => 'kasir1store'.$store->id,
+                    'email' => 'kasir1@store'.$store->id.'.com',
                     'email_verified_at' => now(),
                     'password' => Hash::make('kasir123'),
                     'tenant_id' => $tenant->id,
@@ -47,9 +47,9 @@ class UserSeeder extends Seeder
 
                 // Kasir 2
                 $cashier2 = User::create([
-                    'name' => 'Kasir 2 ' . $store->name,
-                    'username' => 'kasir2store' . $store->id,
-                    'email' => 'kasir2@store' . $store->id . '.com',
+                    'name' => 'Kasir 2 '.$store->name,
+                    'username' => 'kasir2store'.$store->id,
+                    'email' => 'kasir2@store'.$store->id.'.com',
                     'email_verified_at' => now(),
                     'password' => Hash::make('kasir123'),
                     'tenant_id' => $tenant->id,

@@ -28,7 +28,7 @@ class CategorySeeder extends Seeder
                 Category::create([
                     'store_id' => $store->id,
                     'name' => $categoryName,
-                    'description' => 'Kategori ' . $categoryName . ' untuk ' . $store->name,
+                    'description' => 'Kategori '.$categoryName.' untuk '.$store->name,
                     'is_active' => true,
                 ]);
             }
