@@ -143,8 +143,7 @@
             </div>
 
             <div>
-                <flux:button wire:click="clearFilters" variant="subtle" class="w-full">
-                    <flux:icon.x-mark class="w-4 h-4 mr-2" />
+                <flux:button wire:click="clearFilters" variant="outline" class="w-full" icon="x-mark">
                     Clear Filters
                 </flux:button>
             </div>

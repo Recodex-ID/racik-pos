@@ -107,8 +107,7 @@
         </div>
 
         <div class="mt-4">
-            <flux:button wire:click="clearFilters" variant="subtle" size="sm">
-                <flux:icon.x-mark class="w-4 h-4 mr-2" />
+            <flux:button wire:click="clearFilters" variant="outline" size="sm" icon="x-mark">
                 Clear Filters
             </flux:button>
         </div>
@@ -167,10 +166,10 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <flux:button
                                     wire:click="viewDetail({{ $transaction->id }})"
-                                    variant="ghost"
+                                    variant="outline"
                                     size="sm"
+                                    icon="eye"
                                 >
-                                    <flux:icon.eye class="w-4 h-4" />
                                     Detail
                                 </flux:button>
                             </td>
