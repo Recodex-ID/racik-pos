@@ -273,8 +273,8 @@ class Cashier extends Component
         $this->currentDraftId = $draft->id;
         $this->selectedCustomerId = $draft->customer_id;
         $this->discountValue = $this->discountType === 'percentage'
-            ? ($draft->discount_amount / $draft->subtotal) * 100
-            : $draft->discount_amount;
+            ? (float) (($draft->discount_amount / $draft->subtotal) * 100)
+            : (float) $draft->discount_amount;
         $this->notes = $draft->notes;
         $this->transactionNumber = $draft->transaction_number;
 
@@ -379,14 +379,18 @@ class Cashier extends Component
         $this->subtotal = 0;
 
         foreach ($this->cart as $item) {
-            $this->subtotal += $item['price'] * $item['quantity'];
+            $this->subtotal += (float) $item['price'] * (int) $item['quantity'];
         }
+
+        // Convert input values to numeric
+        $discountValue = (float) ($this->discountValue ?: 0);
+        $paymentAmount = (float) ($this->paymentAmount ?: 0);
 
         // Calculate discount
         if ($this->discountType === 'percentage') {
-            $this->discountAmount = ($this->subtotal * $this->discountValue) / 100;
+            $this->discountAmount = ($this->subtotal * $discountValue) / 100;
         } else {
-            $this->discountAmount = $this->discountValue;
+            $this->discountAmount = $discountValue;
         }
 
         // Ensure discount doesn't exceed subtotal
@@ -396,8 +400,8 @@ class Cashier extends Component
         $this->totalAmount = $this->subtotal - $this->discountAmount;
 
         // Calculate change
-        if ($this->paymentAmount > 0) {
-            $this->changeAmount = max(0, $this->paymentAmount - $this->totalAmount);
+        if ($paymentAmount > 0) {
+            $this->changeAmount = max(0, $paymentAmount - $this->totalAmount);
         } else {
             $this->changeAmount = 0;
         }
