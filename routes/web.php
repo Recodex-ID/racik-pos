@@ -23,10 +23,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin'])->prefix('tenant')->name('tenant.')->group(function () {
         Route::get('/categories', \App\Livewire\Tenant\ManageCategories::class)->name('categories');
         Route::get('/products', \App\Livewire\Tenant\ManageProducts::class)->name('products');
-        Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');
-        Route::get('/transactions', \App\Livewire\Tenant\ManageTransactions::class)->name('transactions');
-        Route::get('/sales-reports', \App\Livewire\Tenant\SalesReports::class)->name('sales-reports');
-    });
+        Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');    });
 
     // POS Routes (untuk kasir)
     Route::middleware(['role:Admin|Cashier'])->prefix('pos')->name('pos.')->group(function () {

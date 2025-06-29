@@ -111,7 +111,7 @@
     </div>
     @endrole
 
-    @role('Admin|User')
+    @role('Admin|Cashier')
     <!-- Tenant Info -->
     @if(auth()->user()->tenant)
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">

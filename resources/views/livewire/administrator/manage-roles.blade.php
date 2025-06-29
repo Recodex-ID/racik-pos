@@ -2,7 +2,7 @@
     <header class="flex items-center justify-between mb-6">
         <div>
             <flux:heading size="xl">Role Management</flux:heading>
-            <flux:subheading>Create and manage roles</flux:subheading>
+            <flux:subheading>Manage roles and their information</flux:subheading>
         </div>
 
         <flux:button wire:click="create" variant="primary" icon="plus">

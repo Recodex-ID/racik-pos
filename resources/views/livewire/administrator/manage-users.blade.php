@@ -10,16 +10,16 @@
         </div>
 
         <div class="flex items-center space-x-2">
-            <flux:button 
-                wire:click="toggleSuperAdminView" 
-                variant="outline" 
+            <flux:button
+                wire:click="toggleSuperAdminView"
+                variant="outline"
                 icon="{{ $showSuperAdmins ? 'users' : 'shield-check' }}">
                 {{ $showSuperAdmins ? 'Show Regular Users' : 'Show Super Admins' }}
             </flux:button>
-            
+
             @if(!$showSuperAdmins)
                 <flux:button wire:click="create" variant="primary" icon="plus">
-                    Create User
+                    Create
                 </flux:button>
             @endif
         </div>
@@ -187,15 +187,15 @@
 
                 <flux:field>
                     <flux:label>Tenant</flux:label>
-                    <flux:select wire:model="tenant_id" placeholder="Pilih Tenant (Opsional)">
-                        <option value="">Tidak ada tenant (Super Admin)</option>
+                    <flux:select wire:model="tenant_id" placeholder="Select Tenant (Optional)">
+                        <option value="">No tenant (Super Admin)</option>
                         @foreach ($this->tenants as $tenant)
                             <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
                         @endforeach
                     </flux:select>
                     <flux:error name="tenant_id" />
                     <flux:description>
-                        Pilih tenant untuk user ini. Kosongkan jika Super Admin.
+                        Select a tenant for this user. Leave blank if Super Admin.
                     </flux:description>
                 </flux:field>
 
