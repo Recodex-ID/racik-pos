@@ -100,8 +100,8 @@ class Dashboard extends Component
         $revenues = [];
         $counts = [];
 
-        // Generate hourly data for today (6 AM to 10 PM)
-        for ($hour = 6; $hour <= 22; $hour++) {
+        // Generate hourly data for today (24 hours: 00:00 to 23:59)
+        for ($hour = 0; $hour <= 23; $hour++) {
             $startTime = today()->setHour($hour)->setMinute(0)->setSecond(0);
             $endTime = today()->setHour($hour)->setMinute(59)->setSecond(59);
 
