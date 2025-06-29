@@ -15,11 +15,6 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             TenantSeeder::class,
             UserSeeder::class,
-            CategorySeeder::class,
-            ProductSeeder::class,
-            CustomerSeeder::class,
-            TransactionSeeder::class,
-            TransactionItemSeeder::class,
         ]);
     }
 }

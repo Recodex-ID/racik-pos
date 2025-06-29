@@ -11,18 +11,8 @@ class TenantSeeder extends Seeder
     {
         $tenants = [
             [
-                'name' => 'Toko Maju Jaya',
-                'address' => 'Jl. Sudirman No. 123, Jakarta Pusat',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Warung Berkah',
-                'address' => 'Jl. Gatot Subroto No. 456, Jakarta Selatan',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Minimarket Sejahtera',
-                'address' => 'Jl. Thamrin No. 789, Jakarta Pusat',
+                'name' => 'MachineCoffeeSMI',
+                'address' => 'JL. Babakan Sirna no.25',
                 'is_active' => true,
             ],
         ];

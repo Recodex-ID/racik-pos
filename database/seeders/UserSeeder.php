@@ -11,45 +11,32 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenants = Tenant::all();
+        $tenant = Tenant::where('name', 'MachineCoffeeSMI')->first();
 
-        foreach ($tenants as $tenant) {
-            // Buat Admin untuk setiap tenant
+        if ($tenant) {
+            // Akun Admin
             $admin = User::create([
-                'name' => 'Admin '.$tenant->name,
-                'username' => 'admin'.$tenant->id,
-                'email' => 'admin'.$tenant->id.'@'.strtolower(str_replace(' ', '', $tenant->name)).'.com',
+                'name' => 'machine_coffee_',
+                'username' => 'machine',
+                'email' => 'pengkorstyle48@gmail.com',
                 'email_verified_at' => now(),
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('Machine24'),
                 'tenant_id' => $tenant->id,
                 'is_active' => true,
             ]);
             $admin->assignRole('Admin');
 
-            // Buat Staff untuk tenant
-            // Kasir 1
-            $cashier1 = User::create([
-                'name' => 'Kasir 1 '.$tenant->name,
-                'username' => 'kasir1tenant'.$tenant->id,
-                'email' => 'kasir1@tenant'.$tenant->id.'.com',
+            // Akun Kasir
+            $cashier = User::create([
+                'name' => 'mesinkopi',
+                'username' => 'mesin',
+                'email' => 'kasir.pengkorstyle48@gmail.com', // Modified to avoid duplicate email
                 'email_verified_at' => now(),
-                'password' => Hash::make('kasir123'),
+                'password' => Hash::make('Mesinkopi24'),
                 'tenant_id' => $tenant->id,
                 'is_active' => true,
             ]);
-            $cashier1->assignRole('Cashier');
-
-            // Kasir 2
-            $cashier2 = User::create([
-                'name' => 'Kasir 2 '.$tenant->name,
-                'username' => 'kasir2tenant'.$tenant->id,
-                'email' => 'kasir2@tenant'.$tenant->id.'.com',
-                'email_verified_at' => now(),
-                'password' => Hash::make('kasir123'),
-                'tenant_id' => $tenant->id,
-                'is_active' => true,
-            ]);
-            $cashier2->assignRole('Cashier');
+            $cashier->assignRole('Cashier');
         }
     }
 }
