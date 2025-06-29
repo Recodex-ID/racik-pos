@@ -110,6 +110,9 @@ resources/css/         # Tailwind CSS with Flux theming
 - before generating code, study docs/LARAVEL-BEST-PRACTICES.md and docs/LIVEWIRE-BEST-PRACTICES.md and apply them to the generated code.
 - the generated code must always be consistent with the existing code.
 
+## Git Best Practices
+- biasakan konfirmasi dahulu sebelum push ke repo
+
 ## JavaScript + Livewire Integration Best Practices
 
 ### Event Listeners

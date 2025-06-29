@@ -546,38 +546,35 @@ class Cashier extends Component
     private function generateTransactionNumber()
     {
         $currentTenant = $this->getCurrentTenant();
+        $tenantInitials = $currentTenant->getInitials();
         $today = now()->format('Ymd');
-        $timestamp = now()->format('His'); // Hour, minute, second
         $userId = auth()->id();
         
-        // Generate unique transaction number using multiple components
-        // Format: TRX-{tenant_id}-{date}-{timestamp}-{user_id}
+        // Generate unique transaction number using tenant initials
+        // Format: {tenant_initials}-{date}-{user_id}
         $this->transactionNumber = sprintf(
-            'TRX-%d-%s-%s-%d',
-            $currentTenant->id,
+            '%s-%s-%d',
+            $tenantInitials,
             $today,
-            $timestamp,
             $userId
         );
         
-        // Fallback: If somehow still duplicate, add microseconds
-        $attempts = 0;
-        while ($attempts < 5) {
+        // Fallback: If somehow still duplicate, add sequential number
+        $attempts = 1;
+        $baseTransactionNumber = $this->transactionNumber;
+        
+        while ($attempts <= 999) {
             $existingTransaction = Transaction::where('transaction_number', $this->transactionNumber)->first();
             
             if (!$existingTransaction) {
                 break; // Unique number found
             }
             
-            // Add microseconds for uniqueness
-            $microseconds = substr((string) microtime(true), -3);
+            // Add sequential number for uniqueness
             $this->transactionNumber = sprintf(
-                'TRX-%d-%s-%s-%d-%s',
-                $currentTenant->id,
-                $today,
-                $timestamp,
-                $userId,
-                $microseconds
+                '%s-%03d',
+                $baseTransactionNumber,
+                $attempts
             );
             
             $attempts++;

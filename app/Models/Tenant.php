@@ -50,4 +50,27 @@ class Tenant extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public function getInitials(): string
+    {
+        $words = explode(' ', trim($this->name));
+        $initials = '';
+        
+        foreach ($words as $word) {
+            if (strlen($word) > 0) {
+                $initials .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        
+        // Ensure we have at least 2 characters and at most 3
+        if (strlen($initials) < 2) {
+            // If less than 2 characters, pad with first letters of the name
+            $initials = strtoupper(substr($this->name, 0, 3));
+        } elseif (strlen($initials) > 3) {
+            // If more than 3 characters, take first 3
+            $initials = substr($initials, 0, 3);
+        }
+        
+        return $initials;
+    }
 }
