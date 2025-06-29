@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
@@ -66,6 +67,29 @@ class Dashboard extends Component
         return [
             'labels' => $last7Days,
             'data' => $userCounts,
+        ];
+    }
+
+    #[Computed]
+    public function todayTransactions()
+    {
+        return Transaction::with(['user', 'customer', 'transactionItems.product'])
+            ->whereDate('transaction_date', today())
+            ->latest('transaction_date')
+            ->get();
+    }
+
+    #[Computed]
+    public function todayTransactionStats()
+    {
+        $completedTransactions = Transaction::whereDate('transaction_date', today())->completed();
+        $pendingTransactions = Transaction::whereDate('transaction_date', today())->where('status', 'pending');
+
+        return [
+            'total_transactions' => $completedTransactions->count(),
+            'total_revenue' => $completedTransactions->sum('total_amount'),
+            'average_transaction' => $completedTransactions->avg('total_amount') ?? 0,
+            'pending_transactions' => $pendingTransactions->count(),
         ];
     }
 
