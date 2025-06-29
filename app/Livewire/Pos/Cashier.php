@@ -49,7 +49,6 @@ class Cashier extends Component
 
     public $transactionNumber = '';
 
-    protected $listeners = ['productScanned' => 'addProductByBarcode'];
 
     public function rules(): array
     {
@@ -81,7 +80,7 @@ class Cashier extends Component
         if (strlen($this->productSearch) > 0) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%'.$this->productSearch.'%')
-                    ->orWhere('sku', 'like', '%'.$this->productSearch.'%');
+                    ->orWhere('description', 'like', '%'.$this->productSearch.'%');
             });
         }
 
@@ -166,7 +165,6 @@ class Cashier extends Component
             $this->cart[$cartItemKey] = [
                 'product_id' => $product->id,
                 'name' => $product->name,
-                'sku' => $product->sku,
                 'price' => $product->price,
                 'quantity' => 1,
                 'stock' => $product->stock,
@@ -178,20 +176,6 @@ class Cashier extends Component
         session()->flash('success', "Produk {$product->name} ditambahkan ke keranjang!");
     }
 
-    public function addProductByBarcode($barcode)
-    {
-        $currentTenant = $this->getCurrentTenant();
-        $product = Product::byTenant($currentTenant->id)
-            ->where('sku', $barcode)
-            ->active()
-            ->first();
-
-        if ($product) {
-            $this->addToCart($product->id);
-        } else {
-            session()->flash('error', 'Produk dengan barcode tersebut tidak ditemukan!');
-        }
-    }
 
     public function updateQuantity($cartItemKey, $quantity)
     {

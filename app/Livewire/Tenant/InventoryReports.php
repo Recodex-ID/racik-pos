@@ -39,7 +39,7 @@ class InventoryReports extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('sku', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%')
                       ->orWhereHas('category', function ($category) {
                           $category->where('name', 'like', '%' . $this->search . '%');
                       });
@@ -142,8 +142,8 @@ class InventoryReports extends Component
             ->whereBetween('transactions.transaction_date', [now()->subDays(30), now()])
             ->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
-            ->selectRaw('products.name, products.sku, products.stock, SUM(transaction_items.quantity) as total_sold')
-            ->groupBy('products.id', 'products.name', 'products.sku', 'products.stock')
+            ->selectRaw('products.name, products.stock, SUM(transaction_items.quantity) as total_sold')
+            ->groupBy('products.id', 'products.name', 'products.stock')
             ->orderByDesc('total_sold')
             ->limit(10)
             ->get();

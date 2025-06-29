@@ -7,17 +7,20 @@ use App\Models\Product;
 use App\Models\Tenant;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class ManageProducts extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public $name = '';
 
     public $description = '';
 
-    public $sku = '';
+    public $image = null;
+
+    public $existingImage = '';
 
     public $price = '';
 
@@ -51,11 +54,10 @@ class ManageProducts extends Component
 
     public function rules(): array
     {
-        $currentTenant = $this->getCurrentTenant();
-
-        $rules = [
+        return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
+            'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
             'cost' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -63,14 +65,6 @@ class ManageProducts extends Component
             'category_id' => 'required|exists:categories,id',
             'is_active' => 'boolean',
         ];
-
-        if ($this->editingProductId) {
-            $rules['sku'] = 'required|string|max:50|unique:products,sku,'.$this->editingProductId.',id,tenant_id,'.$currentTenant->id;
-        } else {
-            $rules['sku'] = 'required|string|max:50|unique:products,sku,NULL,id,tenant_id,'.$currentTenant->id;
-        }
-
-        return $rules;
     }
 
     #[Computed]
@@ -83,7 +77,6 @@ class ManageProducts extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('sku', 'like', '%'.$this->search.'%')
                         ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
@@ -159,7 +152,7 @@ class ManageProducts extends Component
 
     public function create()
     {
-        $this->reset(['name', 'description', 'sku', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
         $this->is_active = true;
         $this->stock = 0;
         $this->min_stock = 5;
@@ -174,7 +167,7 @@ class ManageProducts extends Component
         $this->editingProductId = $product->id;
         $this->name = $product->name;
         $this->description = $product->description;
-        $this->sku = $product->sku;
+        $this->existingImage = $product->image;
         $this->price = $product->price;
         $this->cost = $product->cost;
         $this->stock = $product->stock;
@@ -190,11 +183,17 @@ class ManageProducts extends Component
 
         $currentTenant = $this->getCurrentTenant();
 
+        // Handle image upload
+        $imagePath = $this->existingImage;
+        if ($this->image) {
+            $imagePath = $this->image->store('products', 'public');
+        }
+
         $productData = [
             'tenant_id' => $currentTenant->id,
             'name' => $this->name,
             'description' => $this->description,
-            'sku' => $this->sku,
+            'image' => $imagePath,
             'price' => $this->price,
             'cost' => $this->cost,
             'stock' => $this->stock,
@@ -212,7 +211,7 @@ class ManageProducts extends Component
             $message = 'Produk berhasil dibuat!';
         }
 
-        $this->reset(['name', 'description', 'sku', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
         $this->showModal = false;
 
         session()->flash('message', $message);
@@ -275,17 +274,9 @@ class ManageProducts extends Component
         $this->modal("delete-product-{$productId}")->close();
     }
 
-    public function generateSku()
-    {
-        $currentTenant = $this->getCurrentTenant();
-        $prefix = strtoupper(substr($currentTenant->name, 0, 3));
-        $timestamp = now()->format('ymdHis');
-        $this->sku = $prefix.'-'.$timestamp;
-    }
-
     public function resetForm()
     {
-        $this->reset(['name', 'description', 'sku', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
         $this->resetValidation();
     }
 

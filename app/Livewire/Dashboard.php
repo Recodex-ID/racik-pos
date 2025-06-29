@@ -243,17 +243,18 @@ class Dashboard extends Component
     #[Computed]
     public function todayTopProducts()
     {
-        $query = Transaction::where('transactions.status', 'completed')
-            ->whereDate('transactions.transaction_date', today());
+        $tenantId = $this->getTenantQuery();
         
-        if ($tenantId = $this->getTenantQuery()) {
-            $query->where('transactions.tenant_id', $tenantId);
-        }
-        
-        return $query->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
-            ->join('products', 'transaction_items.product_id', '=', 'products.id')
-            ->selectRaw('products.name, products.sku, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
-            ->groupBy('products.id', 'products.name', 'products.sku')
+        return Product::with('category')
+            ->join('transaction_items', 'products.id', '=', 'transaction_items.product_id')
+            ->join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->where('transactions.status', 'completed')
+            ->whereDate('transactions.transaction_date', today())
+            ->when($tenantId, function($query) use ($tenantId) {
+                $query->where('transactions.tenant_id', $tenantId);
+            })
+            ->selectRaw('products.id, products.name, products.category_id, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
+            ->groupBy('products.id', 'products.name', 'products.category_id')
             ->orderByDesc('total_revenue')
             ->limit(5)
             ->get();

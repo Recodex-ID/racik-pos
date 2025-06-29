@@ -147,8 +147,8 @@ class SalesReports extends Component
 
         return $query->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
-            ->selectRaw('products.name, products.sku, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
-            ->groupBy('products.id', 'products.name', 'products.sku')
+            ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
+            ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_revenue')
             ->limit(10)
             ->get();

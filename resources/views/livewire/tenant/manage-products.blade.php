@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+@endphp
+
 <div>
     <header class="flex items-center justify-between mb-6">
         <div>
@@ -26,7 +30,7 @@
     @endif
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk (nama, SKU)..." icon="magnifying-glass" />
+        <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk (nama, deskripsi)..." icon="magnifying-glass" />
 
         <flux:select wire:model.live="filterCategory" placeholder="Filter kategori...">
             <flux:select.option value="">Semua Kategori</flux:select.option>
@@ -49,7 +53,6 @@
                 <thead class="bg-zinc-50 dark:bg-zinc-800">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Produk</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">SKU</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Kategori</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Harga</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Stok</th>
@@ -61,14 +64,24 @@
                 @forelse ($this->products as $product)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                         <td class="px-6 py-4">
-                            <div>
-                                <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</div>
-                                @if($product->description)
-                                    <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ Str::limit($product->description, 40) }}</div>
-                                @endif
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    @if($product->image)
+                                        <img class="h-12 w-12 rounded-lg object-cover" src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
+                                    @else
+                                        <div class="h-12 w-12 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
+                                            <flux:icon name="photo" class="h-6 w-6 text-zinc-400" />
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</div>
+                                    @if($product->description)
+                                        <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ Str::limit($product->description, 40) }}</div>
+                                    @endif
+                                </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-zinc-500 dark:text-zinc-400">{{ $product->sku }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
                             <flux:badge variant="outline" size="sm">
                                 {{ $product->category->name }}
@@ -106,7 +119,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center">
+                        <td colspan="6" class="px-6 py-8 text-center">
                             <div class="flex flex-col items-center justify-center space-y-3">
                                 <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
                                     <flux:icon name="cube" class="w-6 h-6 text-zinc-400" />
@@ -161,17 +174,28 @@
                         </flux:field>
 
                         <flux:field>
-                            <flux:label>SKU (Kode Produk)</flux:label>
-                            <div class="flex gap-2">
-                                <flux:input wire:model="sku" placeholder="Masukkan SKU..." class="flex-1" />
-                                <flux:button type="button" wire:click="generateSku" size="sm" variant="outline" icon="refresh">
-                                    Generate
-                                </flux:button>
+                            <flux:label>Gambar Produk</flux:label>
+                            <div class="space-y-3">
+                                @if($existingImage && !$image)
+                                    <div class="flex items-center space-x-3">
+                                        <img src="{{ Storage::url($existingImage) }}" alt="Current image" class="h-20 w-20 rounded-lg object-cover">
+                                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Gambar saat ini</div>
+                                    </div>
+                                @endif
+                                
+                                @if($image)
+                                    <div class="flex items-center space-x-3">
+                                        <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="h-20 w-20 rounded-lg object-cover">
+                                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Preview gambar baru</div>
+                                    </div>
+                                @endif
+                                
+                                <flux:input type="file" wire:model="image" accept="image/*" />
+                                <flux:error name="image" />
+                                <flux:description>
+                                    Upload gambar produk (maksimal 2MB)
+                                </flux:description>
                             </div>
-                            <flux:error name="sku" />
-                            <flux:description>
-                                SKU harus unik untuk setiap produk
-                            </flux:description>
                         </flux:field>
 
                         <flux:field>
@@ -309,7 +333,7 @@
                 <div>
                     <flux:heading size="lg">Hapus Produk?</flux:heading>
                     <flux:text class="mt-2">
-                        <p>Anda akan menghapus produk "{{ $product->name }}" ({{ $product->sku }}).</p>
+                        <p>Anda akan menghapus produk "{{ $product->name }}".</p>
                         @if($product->transactionItems()->count() > 0)
                             <p class="text-red-600 dark:text-red-400 font-medium">
                                 Produk ini memiliki riwayat transaksi dan tidak dapat dihapus!

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->timestamp('transaction_date');
             $table->decimal('subtotal', 12, 2);
             $table->decimal('discount_amount', 12, 2)->default(0);
-            $table->decimal('tax_amount', 12, 2)->default(0);
             $table->decimal('total_amount', 12, 2);
             $table->enum('payment_method', ['cash', 'card', 'transfer', 'qris']);
             $table->decimal('payment_amount', 12, 2);

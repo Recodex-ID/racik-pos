@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+@endphp
+
 <div class="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900">
     <!-- Header POS -->
     <header class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-4">
@@ -39,7 +43,7 @@
             <div class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 p-6">
                 <flux:input
                     wire:model.live.debounce.300ms="productSearch"
-                    placeholder="Cari produk (nama/SKU) atau scan barcode..."
+                    placeholder="Cari produk (nama/deskripsi)..."
                     icon="magnifying-glass"
                     class="text-lg"
                     autofocus
@@ -54,11 +58,21 @@
                             <div wire:click="addToCart({{ $product->id }})"
                                  class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 cursor-pointer transition-all duration-200 transform hover:scale-105">
                                 <div class="flex flex-col h-full">
+                                    <!-- Product Image -->
+                                    <div class="mb-3">
+                                        @if($product->image)
+                                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="w-full h-32 object-cover rounded-lg">
+                                        @else
+                                            <div class="w-full h-32 bg-zinc-100 dark:bg-zinc-700 rounded-lg flex items-center justify-center">
+                                                <flux:icon name="photo" class="h-8 w-8 text-zinc-400" />
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
                                     <div class="flex-1">
                                         <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm leading-tight">{{ $product->name }}</h3>
                                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">{{ $product->category->name }}</p>
-                                        <div class="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-300 mb-3">
-                                            <span>{{ $product->sku }}</span>
+                                        <div class="flex items-center justify-end text-xs text-zinc-600 dark:text-zinc-300 mb-3">
                                             <span class="flex items-center bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">
                                                 <flux:icon name="cube" class="w-3 h-3 mr-1" />
                                                 {{ $product->stock }}
@@ -117,7 +131,6 @@
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1 mr-4">
                                             <h3 class="font-medium text-zinc-900 dark:text-zinc-100">{{ $item['name'] }}</h3>
-                                            <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ $item['sku'] }}</p>
                                             <p class="text-sm text-zinc-600 dark:text-zinc-300">
                                                 Rp {{ number_format($item['price'], 0, ',', '.') }} x {{ $item['quantity'] }}
                                             </p>
@@ -350,26 +363,3 @@
     </flux:modal>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Listen for barcode scanner input
-    let barcodeBuffer = '';
-    let barcodeTimeout;
-
-    document.addEventListener('keypress', function(e) {
-        // Check if we're not in an input field
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-            clearTimeout(barcodeTimeout);
-            barcodeBuffer += e.key;
-
-            // Set timeout to clear buffer (barcode scanners input fast)
-            barcodeTimeout = setTimeout(() => {
-                if (barcodeBuffer.length > 3) {
-                    @this.call('addProductByBarcode', barcodeBuffer);
-                }
-                barcodeBuffer = '';
-            }, 100);
-        }
-    });
-});
-</script>
