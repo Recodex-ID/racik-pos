@@ -40,7 +40,6 @@
                 <flux:navlist.group :heading="__('Laporan')" class="grid">
                     <flux:navlist.item icon="document-text" :href="route('tenant.transactions')" :current="request()->routeIs('tenant.transactions')" wire:navigate>History & Report Transaksi</flux:navlist.item>
                     <flux:navlist.item icon="chart-bar" :href="route('tenant.sales-reports')" :current="request()->routeIs('tenant.sales-reports')" wire:navigate>Laporan Penjualan</flux:navlist.item>
-                    <flux:navlist.item icon="cube-transparent" :href="route('tenant.inventory-reports')" :current="request()->routeIs('tenant.inventory-reports')" wire:navigate>Laporan Stok</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole
             </flux:navlist>

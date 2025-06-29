@@ -72,12 +72,6 @@
                                     <div class="flex-1">
                                         <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm leading-tight">{{ $product->name }}</h3>
                                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">{{ $product->category->name }}</p>
-                                        <div class="flex items-center justify-end text-xs text-zinc-600 dark:text-zinc-300 mb-3">
-                                            <span class="flex items-center bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">
-                                                <flux:icon name="cube" class="w-3 h-3 mr-1" />
-                                                {{ $product->stock }}
-                                            </span>
-                                        </div>
                                     </div>
                                     <div class="text-center mt-2">
                                         <div class="text-lg font-bold text-blue-600 dark:text-blue-400">

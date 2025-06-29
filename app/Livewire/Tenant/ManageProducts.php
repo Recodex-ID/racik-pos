@@ -26,10 +26,6 @@ class ManageProducts extends Component
 
     public $cost = '';
 
-    public $stock = 0;
-
-    public $min_stock = 5;
-
     public $category_id = '';
 
     public $is_active = true;
@@ -38,19 +34,9 @@ class ManageProducts extends Component
 
     public $showModal = false;
 
-    public $showStockModal = false;
-
-    public $stockAdjustment = 0;
-
-    public $stockNote = '';
-
-    public $selectedProductId = null;
-
     public $search = '';
 
     public $filterCategory = '';
-
-    public $filterStock = '';
 
     public function rules(): array
     {
@@ -60,8 +46,6 @@ class ManageProducts extends Component
             'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
             'cost' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'min_stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'is_active' => 'boolean',
         ];
@@ -84,14 +68,6 @@ class ManageProducts extends Component
                 $query->where('category_id', $this->filterCategory);
             });
 
-        // Filter berdasarkan stock status
-        if ($this->filterStock === 'low') {
-            $query->lowStock();
-        } elseif ($this->filterStock === 'out') {
-            $query->where('stock', 0);
-        } elseif ($this->filterStock === 'available') {
-            $query->where('stock', '>', 0);
-        }
 
         return $query->latest()->paginate(10);
     }
@@ -142,20 +118,11 @@ class ManageProducts extends Component
         }
     }
 
-    #[Computed]
-    public function lowStockCount()
-    {
-        $currentTenant = $this->getCurrentTenant();
-
-        return Product::byTenant($currentTenant->id)->lowStock()->count();
-    }
 
     public function create()
     {
-        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'category_id', 'is_active', 'editingProductId']);
         $this->is_active = true;
-        $this->stock = 0;
-        $this->min_stock = 5;
         $this->showModal = true;
     }
 
@@ -170,8 +137,6 @@ class ManageProducts extends Component
         $this->existingImage = $product->image;
         $this->price = $product->price;
         $this->cost = $product->cost;
-        $this->stock = $product->stock;
-        $this->min_stock = $product->min_stock;
         $this->category_id = $product->category_id;
         $this->is_active = $product->is_active;
         $this->showModal = true;
@@ -196,8 +161,6 @@ class ManageProducts extends Component
             'image' => $imagePath,
             'price' => $this->price,
             'cost' => $this->cost,
-            'stock' => $this->stock,
-            'min_stock' => $this->min_stock,
             'category_id' => $this->category_id,
             'is_active' => $this->is_active,
         ];
@@ -211,48 +174,12 @@ class ManageProducts extends Component
             $message = 'Produk berhasil dibuat!';
         }
 
-        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'category_id', 'is_active', 'editingProductId']);
         $this->showModal = false;
 
         session()->flash('message', $message);
     }
 
-    public function openStockModal($productId)
-    {
-        $this->selectedProductId = $productId;
-        $this->stockAdjustment = 0;
-        $this->stockNote = '';
-        $this->showStockModal = true;
-    }
-
-    public function adjustStock()
-    {
-        $this->validate([
-            'stockAdjustment' => 'required|integer|not_in:0',
-            'stockNote' => 'required|string|max:255',
-        ]);
-
-        $currentTenant = $this->getCurrentTenant();
-        $product = Product::byTenant($currentTenant->id)->findOrFail($this->selectedProductId);
-
-        $newStock = $product->stock + $this->stockAdjustment;
-
-        if ($newStock < 0) {
-            $this->addError('stockAdjustment', 'Stok tidak boleh kurang dari 0');
-
-            return;
-        }
-
-        $product->update(['stock' => $newStock]);
-
-        $adjustmentType = $this->stockAdjustment > 0 ? 'masuk' : 'keluar';
-        $message = "Stok {$adjustmentType} berhasil: {$this->stockAdjustment}. Stok sekarang: {$newStock}";
-
-        $this->reset(['selectedProductId', 'stockAdjustment', 'stockNote']);
-        $this->showStockModal = false;
-
-        session()->flash('message', $message);
-    }
 
     public function delete($productId)
     {
@@ -276,15 +203,10 @@ class ManageProducts extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'stock', 'min_stock', 'category_id', 'is_active', 'editingProductId']);
+        $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'category_id', 'is_active', 'editingProductId']);
         $this->resetValidation();
     }
 
-    public function resetStockForm()
-    {
-        $this->reset(['selectedProductId', 'stockAdjustment', 'stockNote']);
-        $this->resetValidation(['stockAdjustment', 'stockNote']);
-    }
 
     public function render()
     {

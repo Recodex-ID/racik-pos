@@ -26,7 +26,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');
         Route::get('/transactions', \App\Livewire\Tenant\ManageTransactions::class)->name('transactions');
         Route::get('/sales-reports', \App\Livewire\Tenant\SalesReports::class)->name('sales-reports');
-        Route::get('/inventory-reports', \App\Livewire\Tenant\InventoryReports::class)->name('inventory-reports');
     });
 
     // POS Routes (untuk kasir)

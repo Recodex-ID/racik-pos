@@ -28,8 +28,6 @@ class ProductSeeder extends Seeder
                         'image' => $productData['image'] ?? null,
                         'price' => $productData['price'],
                         'cost' => $productData['cost'],
-                        'stock' => rand(10, 100),
-                        'min_stock' => 5,
                         'is_active' => true,
                     ]);
                 }

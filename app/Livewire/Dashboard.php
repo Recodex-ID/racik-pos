@@ -148,17 +148,6 @@ class Dashboard extends Component
         return $query->count();
     }
 
-    #[Computed]
-    public function lowStockProducts()
-    {
-        $query = Product::whereColumn('stock', '<=', 'min_stock');
-        
-        if ($tenantId = $this->getTenantQuery()) {
-            $query->where('tenant_id', $tenantId);
-        }
-        
-        return $query->count();
-    }
 
     #[Computed]
     public function recentTransactions()
@@ -225,20 +214,6 @@ class Dashboard extends Component
         ];
     }
 
-    #[Computed]
-    public function lowStockProductsList()
-    {
-        $query = Product::with('category')
-            ->whereColumn('stock', '<=', 'min_stock');
-        
-        if ($tenantId = $this->getTenantQuery()) {
-            $query->where('tenant_id', $tenantId);
-        }
-        
-        return $query->orderBy('stock', 'asc')
-            ->take(5)
-            ->get();
-    }
 
     #[Computed]
     public function todayTopProducts()

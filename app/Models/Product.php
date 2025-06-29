@@ -19,8 +19,6 @@ class Product extends Model
         'image',
         'price',
         'cost',
-        'stock',
-        'min_stock',
         'is_active',
     ];
 
@@ -53,10 +51,5 @@ class Product extends Model
     public function scopeByTenant($query, $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
-    }
-
-    public function scopeLowStock($query)
-    {
-        return $query->whereColumn('stock', '<=', 'min_stock');
     }
 }

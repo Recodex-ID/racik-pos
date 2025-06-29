@@ -171,20 +171,6 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Stok Menipis</h3>
-                    <p class="text-sm text-zinc-600 dark:text-zinc-400">Produk dengan stok rendah</p>
-                </div>
-                <div class="rounded-full bg-red-100 p-3 dark:bg-red-900/20">
-                    <flux:icon.exclamation-triangle class="h-6 w-6 text-red-600" />
-                </div>
-            </div>
-            <div class="mt-4">
-                <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{{ number_format($this->lowStockProducts) }}</p>
-            </div>
-        </div>
     </div>
 
     <!-- Today's Sales Report Section -->
@@ -334,33 +320,6 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <h3 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Laporan Stok - Produk Stok Menipis</h3>
-            <div class="space-y-3">
-                @forelse($this->lowStockProductsList as $product)
-                    <div class="flex items-center justify-between rounded-lg bg-red-50 p-3 dark:bg-red-900/10 border border-red-200 dark:border-red-800">
-                        <div class="flex items-center space-x-3">
-                            <div class="rounded-full bg-red-100 p-2 dark:bg-red-900/20">
-                                <flux:icon.exclamation-triangle class="h-4 w-4 text-red-600" />
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $product->name }}</p>
-                                <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ $product->category->name ?? 'No Category' }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-medium text-red-600">Stok: {{ $product->stock }}</p>
-                            <p class="text-xs text-zinc-500 dark:text-zinc-400">Min: {{ $product->min_stock }}</p>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-8">
-                        <flux:icon.check-circle class="mx-auto h-12 w-12 text-green-500" />
-                        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Semua produk memiliki stok yang cukup</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
     </div>
     @endrole
 </div>

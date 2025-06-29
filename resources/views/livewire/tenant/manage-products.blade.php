@@ -10,11 +10,6 @@
         </div>
 
         <div class="flex gap-2">
-            @if($this->lowStockCount > 0)
-                <flux:badge variant="danger" size="sm" icon="exclamation-triangle">
-                    {{ $this->lowStockCount }} produk stok rendah
-                </flux:badge>
-            @endif
             <flux:button wire:click="create" variant="primary" icon="plus">
                 Tambah Produk
             </flux:button>
@@ -29,7 +24,7 @@
         <flux:callout variant="danger" icon="exclamation-triangle" heading="{{ session('error') }}" class="mb-6" />
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk (nama, deskripsi)..." icon="magnifying-glass" />
 
         <flux:select wire:model.live="filterCategory" placeholder="Filter kategori...">
@@ -37,13 +32,6 @@
             @foreach ($this->categories as $category)
                 <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
             @endforeach
-        </flux:select>
-
-        <flux:select wire:model.live="filterStock" placeholder="Filter stok...">
-            <flux:select.option value="">Semua Stok</flux:select.option>
-            <flux:select.option value="available">Tersedia</flux:select.option>
-            <flux:select.option value="low">Stok Rendah</flux:select.option>
-            <flux:select.option value="out">Stok Habis</flux:select.option>
         </flux:select>
     </div>
 
@@ -55,7 +43,6 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Produk</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Kategori</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Harga</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Stok</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -92,17 +79,6 @@
                             <div class="text-xs text-zinc-500 dark:text-zinc-400">HPP: Rp {{ number_format($product->cost, 0, ',', '.') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-medium {{ $product->stock <= $product->min_stock ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-100' }}">
-                                    {{ $product->stock }}
-                                </span>
-                                @if($product->stock <= $product->min_stock)
-                                    <flux:icon name="exclamation-triangle" class="w-4 h-4 text-red-500" />
-                                @endif
-                            </div>
-                            <div class="text-xs text-zinc-500 dark:text-zinc-400">Min: {{ $product->min_stock }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
                             <flux:badge variant="{{ $product->is_active ? 'primary' : 'outline' }}" size="sm">
                                 {{ $product->is_active ? 'Aktif' : 'Tidak Aktif' }}
                             </flux:badge>
@@ -110,7 +86,6 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
                                 <flux:button wire:click="edit({{ $product->id }})" size="sm" variant="primary" color="blue" icon="pencil" />
-                                <flux:button wire:click="openStockModal({{ $product->id }})" size="sm" variant="primary" color="green" icon="arrows-up-down" />
                                 <flux:modal.trigger name="delete-product-{{ $product->id }}">
                                     <flux:button size="sm" variant="primary" color="red" icon="trash" />
                                 </flux:modal.trigger>
@@ -119,7 +94,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center">
+                        <td colspan="5" class="px-6 py-8 text-center">
                             <div class="flex flex-col items-center justify-center space-y-3">
                                 <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
                                     <flux:icon name="cube" class="w-6 h-6 text-zinc-400" />
@@ -226,22 +201,6 @@
                             </flux:field>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <flux:field>
-                                <flux:label>Stok</flux:label>
-                                <flux:input wire:model="stock" type="number" placeholder="0" />
-                                <flux:error name="stock" />
-                            </flux:field>
-
-                            <flux:field>
-                                <flux:label>Stok Minimum</flux:label>
-                                <flux:input wire:model="min_stock" type="number" placeholder="5" />
-                                <flux:error name="min_stock" />
-                                <flux:description>
-                                    Peringatan jika stok di bawah nilai ini
-                                </flux:description>
-                            </flux:field>
-                        </div>
 
                         <flux:field>
                             <flux:label>Status</flux:label>
@@ -285,46 +244,6 @@
         </form>
     </flux:modal>
 
-    <!-- Modal Stock Adjustment -->
-    <flux:modal wire:model.self="showStockModal" name="stock-adjustment" class="min-w-md max-w-lg" wire:close="resetStockForm">
-        <form wire:submit.prevent="adjustStock">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Penyesuaian Stok</flux:heading>
-                    <flux:text class="mt-2">
-                        Tambah atau kurangi stok produk
-                    </flux:text>
-                </div>
-
-                <flux:field>
-                    <flux:label>Jumlah Penyesuaian</flux:label>
-                    <flux:input wire:model="stockAdjustment" type="number" placeholder="+10 atau -5" />
-                    <flux:error name="stockAdjustment" />
-                    <flux:description>
-                        Gunakan angka positif untuk menambah, negatif untuk mengurangi stok
-                    </flux:description>
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>Catatan</flux:label>
-                    <flux:input wire:model="stockNote" placeholder="Alasan penyesuaian stok..." />
-                    <flux:error name="stockNote" />
-                </flux:field>
-
-                <div class="flex gap-2">
-                    <flux:spacer />
-
-                    <flux:modal.close>
-                        <flux:button variant="ghost">Batal</flux:button>
-                    </flux:modal.close>
-
-                    <flux:button type="submit" variant="primary">
-                        Sesuaikan Stok
-                    </flux:button>
-                </div>
-            </div>
-        </form>
-    </flux:modal>
 
     <!-- Delete Confirmation Modals -->
     @foreach ($this->products as $product)

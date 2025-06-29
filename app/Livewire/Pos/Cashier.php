@@ -73,7 +73,6 @@ class Cashier extends Component
 
         $query = Product::byTenant($currentTenant->id)
             ->active()
-            ->where('stock', '>', 0)
             ->with('category');
 
         // Jika ada pencarian, filter berdasarkan pencarian
@@ -145,8 +144,8 @@ class Cashier extends Component
         $currentTenant = $this->getCurrentTenant();
         $product = Product::byTenant($currentTenant->id)->find($productId);
 
-        if (! $product || ! $product->is_active || $product->stock <= 0) {
-            session()->flash('error', 'Produk tidak tersedia atau stok habis!');
+        if (! $product || ! $product->is_active) {
+            session()->flash('error', 'Produk tidak tersedia!');
 
             return;
         }
@@ -154,12 +153,6 @@ class Cashier extends Component
         $cartItemKey = 'product_'.$productId;
 
         if (isset($this->cart[$cartItemKey])) {
-            // Check if adding one more exceeds stock
-            if ($this->cart[$cartItemKey]['quantity'] + 1 > $product->stock) {
-                session()->flash('error', "Stok tidak mencukupi! Stok tersedia: {$product->stock}");
-
-                return;
-            }
             $this->cart[$cartItemKey]['quantity']++;
         } else {
             $this->cart[$cartItemKey] = [
@@ -167,7 +160,6 @@ class Cashier extends Component
                 'name' => $product->name,
                 'price' => $product->price,
                 'quantity' => 1,
-                'stock' => $product->stock,
             ];
         }
 
@@ -186,14 +178,6 @@ class Cashier extends Component
         }
 
         if (isset($this->cart[$cartItemKey])) {
-            $maxStock = $this->cart[$cartItemKey]['stock'];
-
-            if ($quantity > $maxStock) {
-                session()->flash('error', "Stok tidak mencukupi! Stok tersedia: {$maxStock}");
-
-                return;
-            }
-
             $this->cart[$cartItemKey]['quantity'] = $quantity;
             $this->calculateTotals();
         }
@@ -297,7 +281,7 @@ class Cashier extends Component
                 'notes' => $this->notes,
             ]);
 
-            // Create transaction items and update stock
+            // Create transaction items
             foreach ($this->cart as $item) {
                 TransactionItem::create([
                     'transaction_id' => $transaction->id,
@@ -306,10 +290,6 @@ class Cashier extends Component
                     'unit_price' => $item['price'],
                     'total_price' => $item['price'] * $item['quantity'],
                 ]);
-
-                // Update product stock
-                $product = Product::find($item['product_id']);
-                $product->decrement('stock', $item['quantity']);
             }
 
             DB::commit();
