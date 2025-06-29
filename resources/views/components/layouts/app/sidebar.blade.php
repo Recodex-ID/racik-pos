@@ -35,12 +35,14 @@
                     <flux:navlist.item icon="folder" :href="route('tenant.categories')" :current="request()->routeIs('tenant.categories')" wire:navigate>Kategori</flux:navlist.item>
                     <flux:navlist.item icon="cube" :href="route('tenant.products')" :current="request()->routeIs('tenant.products')" wire:navigate>Produk</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('tenant.customers')" :current="request()->routeIs('tenant.customers')" wire:navigate>Pelanggan</flux:navlist.item>
+                    <flux:navlist.item icon="currency-dollar" :href="route('tenant.expenses')" :current="request()->routeIs('tenant.expenses')" wire:navigate>Pengeluaran</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole
 
                 @hasrole('Admin|Cashier')
                 <flux:navlist.group :heading="__('Laporan')" class="grid">
                     <flux:navlist.item icon="chart-bar-square" :href="route('reports.monthly-transaction')" :current="request()->routeIs('reports.monthly-transaction')" wire:navigate>Transaksi Bulanan</flux:navlist.item>
+                    <flux:navlist.item icon="currency-dollar" :href="route('reports.monthly-expense')" :current="request()->routeIs('reports.monthly-expense')" wire:navigate>Pengeluaran Bulanan</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole
             </flux:navlist>

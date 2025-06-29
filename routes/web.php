@@ -23,7 +23,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin'])->prefix('tenant')->name('tenant.')->group(function () {
         Route::get('/categories', \App\Livewire\Tenant\ManageCategories::class)->name('categories');
         Route::get('/products', \App\Livewire\Tenant\ManageProducts::class)->name('products');
-        Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');    });
+        Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');
+        Route::get('/expenses', \App\Livewire\Tenant\ManageExpenses::class)->name('expenses');
+    });
 
     // POS Routes (untuk kasir)
     Route::middleware(['role:Admin|Cashier'])->prefix('pos')->name('pos.')->group(function () {
@@ -33,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     // Reports Routes (untuk admin dan kasir)
     Route::middleware(['role:Admin|Cashier'])->prefix('reports')->name('reports.')->group(function () {
         Route::get('/monthly-transaction', \App\Livewire\Reports\MonthlyTransaction::class)->name('monthly-transaction');
+        Route::get('/monthly-expense', \App\Livewire\Reports\MonthlyExpense::class)->name('monthly-expense');
     });
 
     Route::redirect('settings', 'settings/profile');
