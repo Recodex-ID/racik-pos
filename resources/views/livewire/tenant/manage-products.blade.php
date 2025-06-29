@@ -2,7 +2,7 @@
     <header class="flex items-center justify-between mb-6">
         <div>
             <flux:heading size="xl">Produk</flux:heading>
-            <flux:subheading>Kelola produk dan inventory untuk {{ $this->currentStore->name }}</flux:subheading>
+            <flux:subheading>Kelola produk dan inventory untuk {{ $this->currentTenant->name }}</flux:subheading>
         </div>
 
         <div class="flex gap-2">
@@ -27,7 +27,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk (nama, SKU)..." icon="magnifying-glass" />
-        
+
         <flux:select wire:model.live="filterCategory" placeholder="Filter kategori...">
             <flux:select.option value="">Semua Kategori</flux:select.option>
             @foreach ($this->categories as $category)
@@ -147,7 +147,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <flux:heading size="md">Informasi Produk</flux:heading>
-                        
+
                         <flux:field>
                             <flux:label>Nama Produk</flux:label>
                             <flux:input wire:model="name" placeholder="Masukkan nama produk..." />
@@ -187,7 +187,7 @@
 
                     <div class="space-y-4">
                         <flux:heading size="md">Harga & Inventory</flux:heading>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <flux:field>
                                 <flux:label>Harga Jual</flux:label>

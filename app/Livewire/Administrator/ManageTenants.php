@@ -13,10 +13,6 @@ class ManageTenants extends Component
 
     public $name = '';
 
-    public $email = '';
-
-    public $phone = '';
-
     public $address = '';
 
     public $is_active = true;
@@ -31,17 +27,9 @@ class ManageTenants extends Component
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'is_active' => 'boolean',
         ];
-
-        if ($this->editingTenantId) {
-            $rules['email'] .= '|unique:tenants,email,'.$this->editingTenantId;
-        } else {
-            $rules['email'] .= '|unique:tenants,email';
-        }
 
         return $rules;
     }
@@ -50,9 +38,7 @@ class ManageTenants extends Component
     public function tenants()
     {
         return Tenant::when($this->search, function ($query) {
-            $query->where('name', 'like', '%'.$this->search.'%')
-                ->orWhere('email', 'like', '%'.$this->search.'%')
-                ->orWhere('phone', 'like', '%'.$this->search.'%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         })
             ->latest()
             ->paginate(10);
@@ -60,7 +46,7 @@ class ManageTenants extends Component
 
     public function create()
     {
-        $this->reset(['name', 'email', 'phone', 'address', 'is_active', 'editingTenantId']);
+        $this->reset(['name', 'address', 'is_active', 'editingTenantId']);
         $this->is_active = true;
         $this->showModal = true;
     }
@@ -70,8 +56,6 @@ class ManageTenants extends Component
         $tenant = Tenant::findOrFail($tenantId);
         $this->editingTenantId = $tenant->id;
         $this->name = $tenant->name;
-        $this->email = $tenant->email;
-        $this->phone = $tenant->phone;
         $this->address = $tenant->address;
         $this->is_active = $tenant->is_active;
         $this->showModal = true;
@@ -83,8 +67,6 @@ class ManageTenants extends Component
 
         $tenantData = [
             'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
             'address' => $this->address,
             'is_active' => $this->is_active,
         ];
@@ -98,7 +80,7 @@ class ManageTenants extends Component
             $message = 'Tenant berhasil dibuat!';
         }
 
-        $this->reset(['name', 'email', 'phone', 'address', 'is_active', 'editingTenantId']);
+        $this->reset(['name', 'address', 'is_active', 'editingTenantId']);
         $this->showModal = false;
 
         session()->flash('message', $message);
@@ -114,7 +96,7 @@ class ManageTenants extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'phone', 'address', 'is_active', 'editingTenantId']);
+        $this->reset(['name', 'address', 'is_active', 'editingTenantId']);
         $this->resetValidation();
     }
 

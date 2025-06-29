@@ -14,7 +14,7 @@ class TransactionItemSeeder extends Seeder
         $transactions = Transaction::all();
 
         foreach ($transactions as $transaction) {
-            $products = Product::where('store_id', $transaction->store_id)->get();
+            $products = Product::where('tenant_id', $transaction->tenant_id)->get();
 
             if ($products->isEmpty()) {
                 continue; // Skip jika tidak ada produk untuk toko ini

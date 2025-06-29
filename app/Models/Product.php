@@ -12,7 +12,7 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'store_id',
+        'tenant_id',
         'category_id',
         'name',
         'description',
@@ -30,9 +30,9 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    public function store(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Store::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function category(): BelongsTo
@@ -50,9 +50,9 @@ class Product extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeByStore($query, $storeId)
+    public function scopeByTenant($query, $tenantId)
     {
-        return $query->where('store_id', $storeId);
+        return $query->where('tenant_id', $tenantId);
     }
 
     public function scopeLowStock($query)

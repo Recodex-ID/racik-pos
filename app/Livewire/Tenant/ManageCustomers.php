@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Customer;
-use App\Models\Store;
+use App\Models\Tenant;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -40,7 +40,7 @@ class ManageCustomers extends Component
 
     public function rules(): array
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $rules = [
             'name' => 'required|string|max:255',
@@ -50,9 +50,9 @@ class ManageCustomers extends Component
         ];
 
         if ($this->editingCustomerId) {
-            $rules['email'] = 'nullable|email|max:255|unique:customers,email,'.$this->editingCustomerId.',id,store_id,'.$currentStore->id;
+            $rules['email'] = 'nullable|email|max:255|unique:customers,email,'.$this->editingCustomerId.',id,tenant_id,'.$currentTenant->id;
         } else {
-            $rules['email'] = 'nullable|email|max:255|unique:customers,email,NULL,id,store_id,'.$currentStore->id;
+            $rules['email'] = 'nullable|email|max:255|unique:customers,email,NULL,id,tenant_id,'.$currentTenant->id;
         }
 
         return $rules;
@@ -61,9 +61,9 @@ class ManageCustomers extends Component
     #[Computed]
     public function customers()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $query = Customer::byStore($currentStore->id)
+        $query = Customer::byTenant($currentTenant->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')
@@ -96,9 +96,9 @@ class ManageCustomers extends Component
             return null;
         }
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Customer::byStore($currentStore->id)
+        return Customer::byTenant($currentTenant->id)
             ->withCount('transactions')
             ->withSum('transactions', 'total_amount')
             ->with(['transactions' => function ($query) {
@@ -110,50 +110,50 @@ class ManageCustomers extends Component
     #[Computed]
     public function customerStats()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         return [
-            'total' => Customer::byStore($currentStore->id)->count(),
-            'active' => Customer::byStore($currentStore->id)->active()->count(),
-            'inactive' => Customer::byStore($currentStore->id)->where('is_active', false)->count(),
-            'with_transactions' => Customer::byStore($currentStore->id)
+            'total' => Customer::byTenant($currentTenant->id)->count(),
+            'active' => Customer::byTenant($currentTenant->id)->active()->count(),
+            'inactive' => Customer::byTenant($currentTenant->id)->where('is_active', false)->count(),
+            'with_transactions' => Customer::byTenant($currentTenant->id)
                 ->whereHas('transactions')
                 ->count(),
         ];
     }
 
     #[Computed]
-    public function currentStore()
+    public function currentTenant()
     {
-        return $this->getCurrentStore();
+        return $this->getCurrentTenant();
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Try to get store from app instance first
+        // Try to get tenant from app instance first
         try {
-            return app('current_store');
+            return app('current_tenant');
         } catch (\Exception $e) {
             // Fallback to getting from request attributes or user
-            $store = request()->attributes->get('current_store');
-            if ($store) {
-                return $store;
+            $tenant = request()->attributes->get('current_tenant');
+            if ($tenant) {
+                return $tenant;
             }
 
-            // Ultimate fallback: get user's store or first active store in tenant
+            // Ultimate fallback: get user's tenant or first active tenant in tenant
             $user = auth()->user();
-            if ($user->store_id) {
-                return Store::find($user->store_id);
+            if ($user->tenant_id) {
+                return Tenant::find($user->tenant_id);
             }
 
-            // For Admin users, get first active store in their tenant
+            // For Admin users, get first active tenant in their tenant
             if ($user->tenant_id) {
-                return Store::where('tenant_id', $user->tenant_id)
+                return Tenant::where('tenant_id', $user->tenant_id)
                     ->where('is_active', true)
                     ->first();
             }
 
-            throw new \Exception('No store context available');
+            throw new \Exception('No tenant context available');
         }
     }
 
@@ -166,9 +166,9 @@ class ManageCustomers extends Component
 
     public function edit($customerId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
+        $customer = Customer::byTenant($currentTenant->id)->findOrFail($customerId);
         $this->editingCustomerId = $customer->id;
         $this->name = $customer->name;
         $this->email = $customer->email;
@@ -182,10 +182,10 @@ class ManageCustomers extends Component
     {
         $this->validate();
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $customerData = [
-            'store_id' => $currentStore->id,
+            'tenant_id' => $currentTenant->id,
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
@@ -194,7 +194,7 @@ class ManageCustomers extends Component
         ];
 
         if ($this->editingCustomerId) {
-            $customer = Customer::byStore($currentStore->id)->findOrFail($this->editingCustomerId);
+            $customer = Customer::byTenant($currentTenant->id)->findOrFail($this->editingCustomerId);
             $customer->update($customerData);
             $message = 'Data pelanggan berhasil diperbarui!';
         } else {
@@ -216,9 +216,9 @@ class ManageCustomers extends Component
 
     public function delete($customerId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
+        $customer = Customer::byTenant($currentTenant->id)->findOrFail($customerId);
 
         // Check if customer has transactions
         if ($customer->transactions()->count() > 0) {
@@ -236,9 +236,9 @@ class ManageCustomers extends Component
 
     public function toggleStatus($customerId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $customer = Customer::byStore($currentStore->id)->findOrFail($customerId);
+        $customer = Customer::byTenant($currentTenant->id)->findOrFail($customerId);
         $customer->update(['is_active' => ! $customer->is_active]);
 
         $status = $customer->is_active ? 'diaktifkan' : 'dinonaktifkan';
@@ -270,6 +270,6 @@ class ManageCustomers extends Component
 
     public function render()
     {
-        return view('livewire.store.manage-customers');
+        return view('livewire.tenant.manage-customers');
     }
 }

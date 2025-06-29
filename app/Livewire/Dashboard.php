@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\Product;
-use App\Models\Store;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -115,7 +114,7 @@ class Dashboard extends Component
     #[Computed]
     public function recentTransactions()
     {
-        return Transaction::with(['customer', 'user', 'store'])
+        return Transaction::with(['customer', 'user', 'tenant'])
             ->where('status', 'completed')
             ->latest()
             ->take(5)

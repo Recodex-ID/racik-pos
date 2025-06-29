@@ -16,23 +16,21 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Super Admin'])->prefix('administrator')->name('admin.')->group(function () {
         Route::get('/users', \App\Livewire\Administrator\ManageUsers::class)->name('users');
         Route::get('/roles', \App\Livewire\Administrator\ManageRoles::class)->name('roles');
-        Route::get('/permissions', \App\Livewire\Administrator\ManagePermissions::class)->name('permissions');
         Route::get('/tenants', \App\Livewire\Administrator\ManageTenants::class)->name('tenants');
-        Route::get('/stores', \App\Livewire\Administrator\ManageStores::class)->name('stores');
     });
 
-    // Store Management Routes (untuk staff toko)
-    Route::middleware(['role:Admin'])->prefix('store')->name('store.')->group(function () {
-        Route::get('/categories', \App\Livewire\Store\ManageCategories::class)->name('categories');
-        Route::get('/products', \App\Livewire\Store\ManageProducts::class)->name('products');
-        Route::get('/customers', \App\Livewire\Store\ManageCustomers::class)->name('customers');
-        Route::get('/transactions', \App\Livewire\Store\ManageTransactions::class)->name('transactions');
-        Route::get('/sales-reports', \App\Livewire\Store\SalesReports::class)->name('sales-reports');
-        Route::get('/inventory-reports', \App\Livewire\Store\InventoryReports::class)->name('inventory-reports');
+    // Tenant Management Routes (untuk staff toko)
+    Route::middleware(['role:Admin'])->prefix('tenant')->name('tenant.')->group(function () {
+        Route::get('/categories', \App\Livewire\Tenant\ManageCategories::class)->name('categories');
+        Route::get('/products', \App\Livewire\Tenant\ManageProducts::class)->name('products');
+        Route::get('/customers', \App\Livewire\Tenant\ManageCustomers::class)->name('customers');
+        Route::get('/transactions', \App\Livewire\Tenant\ManageTransactions::class)->name('transactions');
+        Route::get('/sales-reports', \App\Livewire\Tenant\SalesReports::class)->name('sales-reports');
+        Route::get('/inventory-reports', \App\Livewire\Tenant\InventoryReports::class)->name('inventory-reports');
     });
 
     // POS Routes (untuk kasir)
-    Route::middleware(['role:Admin|User'])->prefix('pos')->name('pos.')->group(function () {
+    Route::middleware(['role:Admin|Cashier'])->prefix('pos')->name('pos.')->group(function () {
         Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
     });
 

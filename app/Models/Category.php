@@ -12,7 +12,7 @@ class Category extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'store_id',
+        'tenant_id',
         'name',
         'description',
         'is_active',
@@ -22,9 +22,9 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
-    public function store(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Store::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function products(): HasMany
@@ -37,8 +37,8 @@ class Category extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeByStore($query, $storeId)
+    public function scopeByTenant($query, $tenantId)
     {
-        return $query->where('store_id', $storeId);
+        return $query->where('tenant_id', $tenantId);
     }
 }

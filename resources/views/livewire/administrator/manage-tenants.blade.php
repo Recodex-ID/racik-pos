@@ -24,8 +24,6 @@
                 <thead class="bg-zinc-50 dark:bg-zinc-800">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Nama</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Telepon</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Dibuat</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Aksi</th>
@@ -35,8 +33,6 @@
                 @forelse ($this->tenants as $tenant)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $tenant->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $tenant->email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $tenant->phone ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
                             <flux:badge variant="{{ $tenant->is_active ? 'primary' : 'outline' }}" size="sm">
                                 {{ $tenant->is_active ? 'Aktif' : 'Tidak Aktif' }}
@@ -56,7 +52,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-zinc-500 dark:text-zinc-400">
+                        <td colspan="4" class="px-6 py-4 text-center text-zinc-500 dark:text-zinc-400">
                             Tidak ada tenant ditemukan
                         </td>
                     </tr>
@@ -87,18 +83,6 @@
                     <flux:label>Nama</flux:label>
                     <flux:input wire:model="name" placeholder="Masukkan nama..." />
                     <flux:error name="name" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>Email</flux:label>
-                    <flux:input wire:model="email" type="email" placeholder="Masukkan email..." />
-                    <flux:error name="email" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>Telepon</flux:label>
-                    <flux:input wire:model="phone" placeholder="Masukkan nomor telepon..." />
-                    <flux:error name="phone" />
                 </flux:field>
 
                 <flux:field>
@@ -138,7 +122,7 @@
                 <div>
                     <flux:heading size="lg">Hapus Tenant?</flux:heading>
                     <flux:text class="mt-2">
-                        <p>Anda akan menghapus tenant "{{ $tenant->name }}" ({{ $tenant->email }}).</p>
+                        <p>Anda akan menghapus tenant "{{ $tenant->name }}".</p>
                         <p>Tindakan ini tidak dapat dibatalkan.</p>
                     </flux:text>
                 </div>

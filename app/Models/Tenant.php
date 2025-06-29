@@ -27,9 +27,9 @@ class Tenant extends Model
         return $this->hasMany(User::class);
     }
 
-    public function stores(): HasMany
+    public function tenants(): HasMany
     {
-        return $this->hasMany(Store::class);
+        return $this->hasMany(Tenant::class);
     }
 
     public function scopeActive($query)

@@ -12,7 +12,7 @@ class Transaction extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'store_id',
+        'tenant_id',
         'customer_id',
         'user_id',
         'transaction_number',
@@ -38,9 +38,9 @@ class Transaction extends Model
         'change_amount' => 'decimal:2',
     ];
 
-    public function store(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Store::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function customer(): BelongsTo
@@ -58,9 +58,9 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
-    public function scopeByStore($query, $storeId)
+    public function scopeByTenant($query, $tenantId)
     {
-        return $query->where('store_id', $storeId);
+        return $query->where('tenant_id', $tenantId);
     }
 
     public function scopeByStatus($query, $status)

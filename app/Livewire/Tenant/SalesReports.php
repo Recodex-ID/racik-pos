@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Transaction;
-use App\Models\Store;
-use App\Models\Product;
+use App\Models\Tenant;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -39,7 +38,7 @@ class SalesReports extends Component
     public function salesSummary()
     {
         $query = $this->getBaseQuery();
-        
+
         return [
             'total_transactions' => $query->count(),
             'total_revenue' => $query->sum('transactions.total_amount'),
@@ -146,7 +145,7 @@ class SalesReports extends Component
     public function topProducts()
     {
         $query = $this->getBaseQuery();
-        
+
         return $query->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
             ->selectRaw('products.name, products.sku, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
@@ -186,7 +185,7 @@ class SalesReports extends Component
     private function getBaseQuery()
     {
         $query = Transaction::where('transactions.status', 'completed')
-            ->where('transactions.store_id', $this->getCurrentStore()->id);
+            ->where('transactions.tenant_id', $this->getCurrentTenant()->id);
 
         if ($this->reportType === 'custom') {
             if ($this->customDateFrom) {
@@ -210,7 +209,7 @@ class SalesReports extends Component
     public function setReportType($type)
     {
         $this->reportType = $type;
-        
+
         // Set default date ranges based on report type
         switch ($type) {
             case 'daily':
@@ -230,7 +229,7 @@ class SalesReports extends Component
                 $this->filterDateTo = now()->format('Y-m-d');
                 break;
         }
-        
+
         // Dispatch browser event to refresh charts
         $this->dispatch('charts-refresh');
     }
@@ -241,14 +240,14 @@ class SalesReports extends Component
         session()->flash('message', 'Export feature will be implemented soon.');
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Assuming user has store_id or using a method to get current store
-        return auth()->user()->store ?? Store::first();
+        // Assuming user has tenant_id or using a method to get current tenant
+        return auth()->user()->tenant ?? Tenant::first();
     }
 
     public function render()
     {
-        return view('livewire.store.sales-reports');
+        return view('livewire.tenant.sales-reports');
     }
 }

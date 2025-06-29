@@ -27,7 +27,6 @@ class User extends Authenticatable
         'email',
         'password',
         'tenant_id',
-        'store_id',
         'is_active',
     ];
 
@@ -75,10 +74,6 @@ class User extends Authenticatable
         return $this->belongsTo(Tenant::class);
     }
 
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
-    }
 
     public function transactions(): HasMany
     {
@@ -98,10 +93,6 @@ class User extends Authenticatable
         return $query->where('tenant_id', $tenantId);
     }
 
-    public function scopeByStore($query, $storeId)
-    {
-        return $query->where('store_id', $storeId);
-    }
 
     /**
      * Helper methods for multi-tenant
@@ -121,8 +112,4 @@ class User extends Authenticatable
         return $this->isSuperAdmin() || $this->tenant_id == $tenantId;
     }
 
-    public function canAccessStore($storeId): bool
-    {
-        return $this->isSuperAdmin() || $this->store_id == $storeId;
-    }
 }

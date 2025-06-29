@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Store;
+use App\Models\Tenant;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -51,7 +51,7 @@ class ManageProducts extends Component
 
     public function rules(): array
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $rules = [
             'name' => 'required|string|max:255',
@@ -65,9 +65,9 @@ class ManageProducts extends Component
         ];
 
         if ($this->editingProductId) {
-            $rules['sku'] = 'required|string|max:50|unique:products,sku,'.$this->editingProductId.',id,store_id,'.$currentStore->id;
+            $rules['sku'] = 'required|string|max:50|unique:products,sku,'.$this->editingProductId.',id,tenant_id,'.$currentTenant->id;
         } else {
-            $rules['sku'] = 'required|string|max:50|unique:products,sku,NULL,id,store_id,'.$currentStore->id;
+            $rules['sku'] = 'required|string|max:50|unique:products,sku,NULL,id,tenant_id,'.$currentTenant->id;
         }
 
         return $rules;
@@ -76,10 +76,10 @@ class ManageProducts extends Component
     #[Computed]
     public function products()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $query = Product::with(['category'])
-            ->byStore($currentStore->id)
+            ->byTenant($currentTenant->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')
@@ -106,55 +106,55 @@ class ManageProducts extends Component
     #[Computed]
     public function categories()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Category::byStore($currentStore->id)
+        return Category::byTenant($currentTenant->id)
             ->active()
             ->orderBy('name')
             ->get();
     }
 
     #[Computed]
-    public function currentStore()
+    public function currentTenant()
     {
-        return $this->getCurrentStore();
+        return $this->getCurrentTenant();
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Try to get store from app instance first
+        // Try to get tenant from app instance first
         try {
-            return app('current_store');
+            return app('current_tenant');
         } catch (\Exception $e) {
             // Fallback to getting from request attributes or user
-            $store = request()->attributes->get('current_store');
-            if ($store) {
-                return $store;
+            $tenant = request()->attributes->get('current_tenant');
+            if ($tenant) {
+                return $tenant;
             }
 
-            // Ultimate fallback: get user's store or first active store in tenant
+            // Ultimate fallback: get user's tenant or first active tenant in tenant
             $user = auth()->user();
-            if ($user->store_id) {
-                return Store::find($user->store_id);
+            if ($user->tenant_id) {
+                return Tenant::find($user->tenant_id);
             }
 
-            // For Admin users, get first active store in their tenant
+            // For Admin users, get first active tenant in their tenant
             if ($user->tenant_id) {
-                return Store::where('tenant_id', $user->tenant_id)
+                return Tenant::where('tenant_id', $user->tenant_id)
                     ->where('is_active', true)
                     ->first();
             }
 
-            throw new \Exception('No store context available');
+            throw new \Exception('No tenant context available');
         }
     }
 
     #[Computed]
     public function lowStockCount()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Product::byStore($currentStore->id)->lowStock()->count();
+        return Product::byTenant($currentTenant->id)->lowStock()->count();
     }
 
     public function create()
@@ -168,9 +168,9 @@ class ManageProducts extends Component
 
     public function edit($productId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $product = Product::byStore($currentStore->id)->findOrFail($productId);
+        $product = Product::byTenant($currentTenant->id)->findOrFail($productId);
         $this->editingProductId = $product->id;
         $this->name = $product->name;
         $this->description = $product->description;
@@ -188,10 +188,10 @@ class ManageProducts extends Component
     {
         $this->validate();
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $productData = [
-            'store_id' => $currentStore->id,
+            'tenant_id' => $currentTenant->id,
             'name' => $this->name,
             'description' => $this->description,
             'sku' => $this->sku,
@@ -204,7 +204,7 @@ class ManageProducts extends Component
         ];
 
         if ($this->editingProductId) {
-            $product = Product::byStore($currentStore->id)->findOrFail($this->editingProductId);
+            $product = Product::byTenant($currentTenant->id)->findOrFail($this->editingProductId);
             $product->update($productData);
             $message = 'Produk berhasil diperbarui!';
         } else {
@@ -233,8 +233,8 @@ class ManageProducts extends Component
             'stockNote' => 'required|string|max:255',
         ]);
 
-        $currentStore = $this->getCurrentStore();
-        $product = Product::byStore($currentStore->id)->findOrFail($this->selectedProductId);
+        $currentTenant = $this->getCurrentTenant();
+        $product = Product::byTenant($currentTenant->id)->findOrFail($this->selectedProductId);
 
         $newStock = $product->stock + $this->stockAdjustment;
 
@@ -257,9 +257,9 @@ class ManageProducts extends Component
 
     public function delete($productId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $product = Product::byStore($currentStore->id)->findOrFail($productId);
+        $product = Product::byTenant($currentTenant->id)->findOrFail($productId);
 
         // Check if product has transactions
         if ($product->transactionItems()->count() > 0) {
@@ -277,8 +277,8 @@ class ManageProducts extends Component
 
     public function generateSku()
     {
-        $currentStore = $this->getCurrentStore();
-        $prefix = strtoupper(substr($currentStore->name, 0, 3));
+        $currentTenant = $this->getCurrentTenant();
+        $prefix = strtoupper(substr($currentTenant->name, 0, 3));
         $timestamp = now()->format('ymdHis');
         $this->sku = $prefix.'-'.$timestamp;
     }
@@ -297,6 +297,6 @@ class ManageProducts extends Component
 
     public function render()
     {
-        return view('livewire.store.manage-products');
+        return view('livewire.tenant.manage-products');
     }
 }

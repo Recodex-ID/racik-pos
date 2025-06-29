@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-xl font-bold text-zinc-900 dark:text-zinc-100">Point of Sale</h1>
-                <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ $this->currentStore->name }} - {{ $transactionNumber }}</p>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ $this->currentTenant->name }} - {{ $transactionNumber }}</p>
             </div>
             <div class="flex items-center space-x-4">
                 <div class="text-right">

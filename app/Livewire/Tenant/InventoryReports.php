@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Store;
+use App\Models\Tenant;
 use App\Models\Transaction;
-use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,7 +35,7 @@ class InventoryReports extends Component
     public function products()
     {
         $query = Product::with(['category'])
-            ->where('store_id', $this->getCurrentStore()->id)
+            ->where('tenant_id', $this->getCurrentTenant()->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
@@ -85,7 +84,7 @@ class InventoryReports extends Component
     #[Computed]
     public function categories()
     {
-        return Category::where('store_id', $this->getCurrentStore()->id)
+        return Category::where('tenant_id', $this->getCurrentTenant()->id)
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
@@ -94,21 +93,21 @@ class InventoryReports extends Component
     #[Computed]
     public function inventorySummary()
     {
-        $storeId = $this->getCurrentStore()->id;
-        
+        $storeId = $this->getCurrentTenant()->id;
+
         return [
-            'total_products' => Product::where('store_id', $storeId)->count(),
-            'total_stock_value' => Product::where('store_id', $storeId)->selectRaw('SUM(stock * cost)')->value('SUM(stock * cost)') ?? 0,
-            'low_stock_count' => Product::where('store_id', $storeId)->whereColumn('stock', '<=', 'min_stock')->count(),
-            'out_of_stock_count' => Product::where('store_id', $storeId)->where('stock', 0)->count(),
-            'total_categories' => Category::where('store_id', $storeId)->where('is_active', true)->count(),
+            'total_products' => Product::where('tenant_id', $storeId)->count(),
+            'total_stock_value' => Product::where('tenant_id', $storeId)->selectRaw('SUM(stock * cost)')->value('SUM(stock * cost)') ?? 0,
+            'low_stock_count' => Product::where('tenant_id', $storeId)->whereColumn('stock', '<=', 'min_stock')->count(),
+            'out_of_stock_count' => Product::where('tenant_id', $storeId)->where('stock', 0)->count(),
+            'total_categories' => Category::where('tenant_id', $storeId)->where('is_active', true)->count(),
         ];
     }
 
     #[Computed]
     public function stockValueByCategory()
     {
-        $data = Product::where('products.store_id', $this->getCurrentStore()->id)
+        $data = Product::where('products.tenant_id', $this->getCurrentTenant()->id)
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->selectRaw('categories.name, SUM(products.stock * products.cost) as total_value, SUM(products.stock) as total_stock')
             ->groupBy('categories.id', 'categories.name')
@@ -126,7 +125,7 @@ class InventoryReports extends Component
     public function lowStockProducts()
     {
         return Product::with('category')
-            ->where('store_id', $this->getCurrentStore()->id)
+            ->where('tenant_id', $this->getCurrentTenant()->id)
             ->whereColumn('stock', '<=', 'min_stock')
             ->orderBy('stock', 'asc')
             ->limit(10)
@@ -136,10 +135,10 @@ class InventoryReports extends Component
     #[Computed]
     public function mostSoldProducts()
     {
-        $storeId = $this->getCurrentStore()->id;
-        
+        $storeId = $this->getCurrentTenant()->id;
+
         return Transaction::where('transactions.status', 'completed')
-            ->where('transactions.store_id', $storeId)
+            ->where('transactions.tenant_id', $storeId)
             ->whereBetween('transactions.transaction_date', [now()->subDays(30), now()])
             ->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
@@ -153,7 +152,7 @@ class InventoryReports extends Component
     #[Computed]
     public function stockMovementTrend()
     {
-        $storeId = $this->getCurrentStore()->id;
+        $storeId = $this->getCurrentTenant()->id;
         $data = [];
         $labels = [];
 
@@ -161,13 +160,13 @@ class InventoryReports extends Component
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $labels[] = $date->format('d/m');
-            
+
             $dailySold = Transaction::where('transactions.status', 'completed')
-                ->where('transactions.store_id', $storeId)
+                ->where('transactions.tenant_id', $storeId)
                 ->whereDate('transactions.transaction_date', $date)
                 ->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
                 ->sum('transaction_items.quantity');
-                
+
             $data[] = $dailySold;
         }
 
@@ -185,7 +184,7 @@ class InventoryReports extends Component
             $this->sortBy = $field;
             $this->sortDirection = 'asc';
         }
-        
+
         $this->resetPage();
     }
 
@@ -220,14 +219,19 @@ class InventoryReports extends Component
         session()->flash('message', 'Export feature will be implemented soon.');
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Assuming user has store_id or using a method to get current store
-        return auth()->user()->store ?? Store::first();
+        // Get user's tenant
+        $user = auth()->user();
+        if ($user->tenant_id) {
+            return Tenant::find($user->tenant_id);
+        }
+
+        throw new \Exception('No tenant context available');
     }
 
     public function render()
     {
-        return view('livewire.store.inventory-reports');
+        return view('livewire.tenant.inventory-reports');
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Category;
-use App\Models\Store;
+use App\Models\Tenant;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,9 +36,9 @@ class ManageCategories extends Component
     #[Computed]
     public function categories()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Category::byStore($currentStore->id)
+        return Category::byTenant($currentTenant->id)
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%')
                     ->orWhere('description', 'like', '%'.$this->search.'%');
@@ -49,37 +49,30 @@ class ManageCategories extends Component
     }
 
     #[Computed]
-    public function currentStore()
+    public function currentTenant()
     {
-        return $this->getCurrentStore();
+        return $this->getCurrentTenant();
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Try to get store from app instance first
+        // Try to get tenant from app instance first
         try {
-            return app('current_store');
+            return app('current_tenant');
         } catch (\Exception $e) {
             // Fallback to getting from request attributes or user
-            $store = request()->attributes->get('current_store');
-            if ($store) {
-                return $store;
+            $tenant = request()->attributes->get('current_tenant');
+            if ($tenant) {
+                return $tenant;
             }
 
-            // Ultimate fallback: get user's store or first active store in tenant
+            // Ultimate fallback: get user's tenant
             $user = auth()->user();
-            if ($user->store_id) {
-                return Store::find($user->store_id);
-            }
-
-            // For Admin users, get first active store in their tenant
             if ($user->tenant_id) {
-                return Store::where('tenant_id', $user->tenant_id)
-                    ->where('is_active', true)
-                    ->first();
+                return Tenant::find($user->tenant_id);
             }
 
-            throw new \Exception('No store context available');
+            throw new \Exception('No tenant context available');
         }
     }
 
@@ -92,9 +85,9 @@ class ManageCategories extends Component
 
     public function edit($categoryId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $category = Category::byStore($currentStore->id)->findOrFail($categoryId);
+        $category = Category::byTenant($currentTenant->id)->findOrFail($categoryId);
         $this->editingCategoryId = $category->id;
         $this->name = $category->name;
         $this->description = $category->description;
@@ -106,17 +99,17 @@ class ManageCategories extends Component
     {
         $this->validate();
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $categoryData = [
-            'store_id' => $currentStore->id,
+            'tenant_id' => $currentTenant->id,
             'name' => $this->name,
             'description' => $this->description,
             'is_active' => $this->is_active,
         ];
 
         if ($this->editingCategoryId) {
-            $category = Category::byStore($currentStore->id)->findOrFail($this->editingCategoryId);
+            $category = Category::byTenant($currentTenant->id)->findOrFail($this->editingCategoryId);
             $category->update($categoryData);
             $message = 'Kategori berhasil diperbarui!';
         } else {
@@ -132,9 +125,9 @@ class ManageCategories extends Component
 
     public function delete($categoryId)
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $category = Category::byStore($currentStore->id)->findOrFail($categoryId);
+        $category = Category::byTenant($currentTenant->id)->findOrFail($categoryId);
 
         // Check if category has products
         if ($category->products()->count() > 0) {
@@ -158,6 +151,6 @@ class ManageCategories extends Component
 
     public function render()
     {
-        return view('livewire.store.manage-categories');
+        return view('livewire.tenant.manage-categories');
     }
 }

@@ -2,7 +2,7 @@
     <header class="flex items-center justify-between mb-6">
         <div>
             <flux:heading size="xl">Kategori Produk</flux:heading>
-            <flux:subheading>Kelola kategori produk untuk {{ $this->currentStore->name }}</flux:subheading>
+            <flux:subheading>Kelola kategori produk untuk {{ $this->currentTenant->name }}</flux:subheading>
         </div>
 
         <flux:button wire:click="create" variant="primary" icon="plus">

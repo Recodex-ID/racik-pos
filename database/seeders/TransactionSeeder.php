@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use App\Models\Store;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,22 +13,22 @@ class TransactionSeeder extends Seeder
 {
     public function run(): void
     {
-        $stores = Store::all();
+        $tenants = Tenant::all();
         $users = User::all();
 
-        foreach ($stores as $store) {
-            $customers = Customer::where('store_id', $store->id)->get();
-            $storeUsers = $users->where('store_id', $store->id);
+        foreach ($tenants as $tenant) {
+            $customers = Customer::where('tenant_id', $tenant->id)->get();
+            $tenantUsers = $users->where('tenant_id', $tenant->id);
 
-            if ($storeUsers->isEmpty()) {
-                $storeUsers = $users->take(1); // Fallback ke user pertama jika belum ada relasi store
+            if ($tenantUsers->isEmpty()) {
+                $tenantUsers = $users->take(1); // Fallback ke user pertama jika belum ada relasi tenant
             }
 
             // Buat 10 transaksi per toko
             for ($i = 1; $i <= 10; $i++) {
                 $transactionDate = Carbon::now()->subDays(rand(0, 30));
                 $customer = $customers->random();
-                $user = $storeUsers->random();
+                $user = $tenantUsers->random();
 
                 $subtotal = rand(50000, 500000);
                 $discountAmount = rand(0, $subtotal * 0.1);
@@ -38,10 +38,10 @@ class TransactionSeeder extends Seeder
                 $changeAmount = $paymentAmount - $totalAmount;
 
                 Transaction::create([
-                    'store_id' => $store->id,
+                    'tenant_id' => $tenant->id,
                     'customer_id' => $customer->id,
                     'user_id' => $user->id,
-                    'transaction_number' => 'TRX-'.$store->id.'-'.str_pad($i, 4, '0', STR_PAD_LEFT).'-'.$transactionDate->format('Ymd'),
+                    'transaction_number' => 'TRX-'.$tenant->id.'-'.str_pad($i, 4, '0', STR_PAD_LEFT).'-'.$transactionDate->format('Ymd'),
                     'transaction_date' => $transactionDate,
                     'subtotal' => $subtotal,
                     'discount_amount' => $discountAmount,
@@ -51,7 +51,7 @@ class TransactionSeeder extends Seeder
                     'payment_amount' => $paymentAmount,
                     'change_amount' => $changeAmount,
                     'status' => 'completed',
-                    'notes' => 'Transaksi contoh untuk '.$store->name,
+                    'notes' => 'Transaksi contoh untuk '.$tenant->name,
                 ]);
             }
         }

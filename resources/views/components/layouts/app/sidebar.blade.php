@@ -20,13 +20,11 @@
                 <flux:navlist.group :heading="__('Administrator')" class="grid">
                     <flux:navlist.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>Manage Users</flux:navlist.item>
                     <flux:navlist.item icon="shield-check" :href="route('admin.roles')" :current="request()->routeIs('admin.roles')" wire:navigate>Manage Roles</flux:navlist.item>
-                    <flux:navlist.item icon="key" :href="route('admin.permissions')" :current="request()->routeIs('admin.permissions')" wire:navigate>Manage Permissions</flux:navlist.item>
                     <flux:navlist.item icon="building-office" :href="route('admin.tenants')" :current="request()->routeIs('admin.tenants')" wire:navigate>Manage Tenants</flux:navlist.item>
-                    <flux:navlist.item icon="building-storefront" :href="route('admin.stores')" :current="request()->routeIs('admin.stores')" wire:navigate>Manage Stores</flux:navlist.item>
                 </flux:navlist.group>
                 @endrole
 
-                @hasrole('Admin|User')
+                @hasrole('Admin|Cashier')
                 <flux:navlist.group :heading="__('Point of Sale')" class="grid">
                     <flux:navlist.item icon="calculator" :href="route('pos.cashier')" :current="request()->routeIs('pos.cashier')" wire:navigate>Kasir</flux:navlist.item>
                 </flux:navlist.group>
@@ -34,30 +32,20 @@
 
                 @hasrole('Admin')
                 <flux:navlist.group :heading="__('Toko')" class="grid">
-                    <flux:navlist.item icon="folder" :href="route('store.categories')" :current="request()->routeIs('store.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
-                    <flux:navlist.item icon="cube" :href="route('store.products')" :current="request()->routeIs('store.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
-                    <flux:navlist.item icon="users" :href="route('store.customers')" :current="request()->routeIs('store.customers')" wire:navigate>Pelanggan</flux:navlist.item>
+                    <flux:navlist.item icon="folder" :href="route('tenant.categories')" :current="request()->routeIs('tenant.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
+                    <flux:navlist.item icon="cube" :href="route('tenant.products')" :current="request()->routeIs('tenant.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
+                    <flux:navlist.item icon="users" :href="route('tenant.customers')" :current="request()->routeIs('tenant.customers')" wire:navigate>Pelanggan</flux:navlist.item>
                 </flux:navlist.group>
 
                 <flux:navlist.group :heading="__('Laporan')" class="grid">
-                    <flux:navlist.item icon="document-text" :href="route('store.transactions')" :current="request()->routeIs('store.transactions')" wire:navigate>History & Report Transaksi</flux:navlist.item>
-                    <flux:navlist.item icon="chart-bar" :href="route('store.sales-reports')" :current="request()->routeIs('store.sales-reports')" wire:navigate>Laporan Penjualan</flux:navlist.item>
-                    <flux:navlist.item icon="cube-transparent" :href="route('store.inventory-reports')" :current="request()->routeIs('store.inventory-reports')" wire:navigate>Laporan Stok</flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('tenant.transactions')" :current="request()->routeIs('tenant.transactions')" wire:navigate>History & Report Transaksi</flux:navlist.item>
+                    <flux:navlist.item icon="chart-bar" :href="route('tenant.sales-reports')" :current="request()->routeIs('tenant.sales-reports')" wire:navigate>Laporan Penjualan</flux:navlist.item>
+                    <flux:navlist.item icon="cube-transparent" :href="route('tenant.inventory-reports')" :current="request()->routeIs('tenant.inventory-reports')" wire:navigate>Laporan Stok</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole
             </flux:navlist>
 
             <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/zachran-recodex/laravel-livewire-crud.git" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://github.com/zachran-recodex/laravel-livewire-crud.git" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">

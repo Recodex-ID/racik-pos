@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Livewire\Store;
+namespace App\Livewire\Tenant;
 
 use App\Models\Transaction;
-use App\Models\Store;
-use App\Models\Customer;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Models\Tenant;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -40,8 +37,8 @@ class ManageTransactions extends Component
     #[Computed]
     public function transactions()
     {
-        $query = Transaction::with(['customer', 'user', 'store', 'transactionItems.product'])
-            ->byStore($this->getCurrentStore()->id)
+        $query = Transaction::with(['customer', 'user', 'tenant', 'transactionItems.product'])
+            ->byTenant($this->getCurrentTenant()->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('transaction_number', 'like', '%' . $this->search . '%')
@@ -114,7 +111,7 @@ class ManageTransactions extends Component
     private function getFilteredQuery()
     {
         return Transaction::query()
-            ->byStore($this->getCurrentStore()->id)
+            ->byTenant($this->getCurrentTenant()->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('transaction_number', 'like', '%' . $this->search . '%')
@@ -143,12 +140,12 @@ class ManageTransactions extends Component
     public function viewDetail($transactionId)
     {
         $this->selectedTransaction = Transaction::with([
-            'customer', 
-            'user', 
-            'store', 
+            'customer',
+            'user',
+            'tenant',
             'transactionItems.product.category'
         ])->find($transactionId);
-        
+
         $this->showDetailModal = true;
     }
 
@@ -193,14 +190,14 @@ class ManageTransactions extends Component
         $this->resetPage();
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Assuming user has store_id or using a method to get current store
-        return auth()->user()->store ?? Store::first();
+        // Assuming user has tenant_id or using a method to get current tenant
+        return auth()->user()->tenant ?? Tenant::first();
     }
 
     public function render()
     {
-        return view('livewire.store.manage-transactions');
+        return view('livewire.tenant.manage-transactions');
     }
 }

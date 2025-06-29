@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('tenant_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('store_id')->nullable()->constrained()->onDelete('set null');
             $table->boolean('is_active')->default(true);
         });
     }
@@ -25,8 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['tenant_id']);
-            $table->dropForeign(['store_id']);
-            $table->dropColumn(['tenant_id', 'store_id', 'is_active']);
+            $table->dropColumn(['tenant_id', 'is_active']);
         });
     }
 };

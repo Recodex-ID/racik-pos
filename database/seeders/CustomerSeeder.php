@@ -3,14 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use App\Models\Store;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
 {
     public function run(): void
     {
-        $stores = Store::all();
+        $tenants = Tenant::all();
 
         $customers = [
             [
@@ -45,10 +45,10 @@ class CustomerSeeder extends Seeder
             ],
         ];
 
-        foreach ($stores as $store) {
+        foreach ($tenants as $tenant) {
             foreach ($customers as $customerData) {
                 Customer::create([
-                    'store_id' => $store->id,
+                    'tenant_id' => $tenant->id,
                     'name' => $customerData['name'],
                     'email' => $customerData['email'],
                     'phone' => $customerData['phone'],

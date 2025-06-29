@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -23,41 +22,34 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
                 'tenant_id' => $tenant->id,
-                'store_id' => null, // Admin bisa akses semua store dalam tenant
                 'is_active' => true,
             ]);
             $admin->assignRole('Admin');
 
-            // Buat Staff untuk setiap store dalam tenant
-            $stores = Store::where('tenant_id', $tenant->id)->get();
+            // Buat Staff untuk tenant
+            // Kasir 1
+            $cashier1 = User::create([
+                'name' => 'Kasir 1 '.$tenant->name,
+                'username' => 'kasir1tenant'.$tenant->id,
+                'email' => 'kasir1@tenant'.$tenant->id.'.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('kasir123'),
+                'tenant_id' => $tenant->id,
+                'is_active' => true,
+            ]);
+            $cashier1->assignRole('Cashier');
 
-            foreach ($stores as $store) {
-                // Kasir 1
-                $cashier1 = User::create([
-                    'name' => 'Kasir 1 '.$store->name,
-                    'username' => 'kasir1store'.$store->id,
-                    'email' => 'kasir1@store'.$store->id.'.com',
-                    'email_verified_at' => now(),
-                    'password' => Hash::make('kasir123'),
-                    'tenant_id' => $tenant->id,
-                    'store_id' => $store->id,
-                    'is_active' => true,
-                ]);
-                $cashier1->assignRole('User');
-
-                // Kasir 2
-                $cashier2 = User::create([
-                    'name' => 'Kasir 2 '.$store->name,
-                    'username' => 'kasir2store'.$store->id,
-                    'email' => 'kasir2@store'.$store->id.'.com',
-                    'email_verified_at' => now(),
-                    'password' => Hash::make('kasir123'),
-                    'tenant_id' => $tenant->id,
-                    'store_id' => $store->id,
-                    'is_active' => true,
-                ]);
-                $cashier2->assignRole('User');
-            }
+            // Kasir 2
+            $cashier2 = User::create([
+                'name' => 'Kasir 2 '.$tenant->name,
+                'username' => 'kasir2tenant'.$tenant->id,
+                'email' => 'kasir2@tenant'.$tenant->id.'.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('kasir123'),
+                'tenant_id' => $tenant->id,
+                'is_active' => true,
+            ]);
+            $cashier2->assignRole('Cashier');
         }
     }
 }

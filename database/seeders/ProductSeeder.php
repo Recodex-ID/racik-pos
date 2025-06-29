@@ -4,28 +4,28 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Store;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $stores = Store::all();
+        $tenants = Tenant::all();
 
-        foreach ($stores as $store) {
-            $categories = Category::where('store_id', $store->id)->get();
+        foreach ($tenants as $tenant) {
+            $categories = Category::where('tenant_id', $tenant->id)->get();
 
             foreach ($categories as $category) {
                 $products = $this->getProductsByCategory($category->name);
 
                 foreach ($products as $productData) {
                     Product::create([
-                        'store_id' => $store->id,
+                        'tenant_id' => $tenant->id,
                         'category_id' => $category->id,
                         'name' => $productData['name'],
                         'description' => $productData['description'],
-                        'sku' => $store->id.'-'.strtoupper(substr($productData['name'], 0, 3)).'-'.rand(1000, 9999),
+                        'sku' => $tenant->id.'-'.strtoupper(substr($productData['name'], 0, 3)).'-'.rand(1000, 9999),
                         'price' => $productData['price'],
                         'cost' => $productData['cost'],
                         'stock' => rand(10, 100),

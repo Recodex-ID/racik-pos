@@ -2,7 +2,7 @@
     <header class="flex items-center justify-between mb-6">
         <div>
             <flux:heading size="xl">Pelanggan</flux:heading>
-            <flux:subheading>Kelola data pelanggan untuk {{ $this->currentStore->name }}</flux:subheading>
+            <flux:subheading>Kelola data pelanggan untuk {{ $this->currentTenant->name }}</flux:subheading>
         </div>
 
         <flux:button wire:click="create" variant="primary" icon="plus">
@@ -72,7 +72,7 @@
     <!-- Search and Filters -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari pelanggan..." icon="magnifying-glass" />
-        
+
         <flux:select wire:model.live="filterStatus" placeholder="Filter status...">
             <flux:select.option value="">Semua Status</flux:select.option>
             <flux:select.option value="1">Aktif</flux:select.option>

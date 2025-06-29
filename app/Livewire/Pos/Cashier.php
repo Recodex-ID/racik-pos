@@ -4,7 +4,7 @@ namespace App\Livewire\Pos;
 
 use App\Models\Customer;
 use App\Models\Product;
-use App\Models\Store;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use Illuminate\Support\Facades\DB;
@@ -74,9 +74,9 @@ class Cashier extends Component
     #[Computed]
     public function products()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        $query = Product::byStore($currentStore->id)
+        $query = Product::byTenant($currentTenant->id)
             ->active()
             ->where('stock', '>', 0)
             ->with('category');
@@ -97,9 +97,9 @@ class Cashier extends Component
     #[Computed]
     public function customers()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Customer::byStore($currentStore->id)
+        return Customer::byTenant($currentTenant->id)
             ->active()
             ->orderBy('name')
             ->get();
@@ -112,50 +112,43 @@ class Cashier extends Component
             return null;
         }
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
-        return Customer::byStore($currentStore->id)->find($this->selectedCustomerId);
+        return Customer::byTenant($currentTenant->id)->find($this->selectedCustomerId);
     }
 
     #[Computed]
-    public function currentStore()
+    public function currentTenant()
     {
-        return $this->getCurrentStore();
+        return $this->getCurrentTenant();
     }
 
-    private function getCurrentStore()
+    private function getCurrentTenant()
     {
-        // Try to get store from app instance first
+        // Try to get tenant from app instance first
         try {
-            return app('current_store');
+            return app('current_tenant');
         } catch (\Exception $e) {
             // Fallback to getting from request attributes or user
-            $store = request()->attributes->get('current_store');
-            if ($store) {
-                return $store;
+            $tenant = request()->attributes->get('current_tenant');
+            if ($tenant) {
+                return $tenant;
             }
 
-            // Ultimate fallback: get user's store or first active store in tenant
+            // Ultimate fallback: get user's tenant
             $user = auth()->user();
-            if ($user->store_id) {
-                return Store::find($user->store_id);
-            }
-
-            // For Admin users, get first active store in their tenant
             if ($user->tenant_id) {
-                return Store::where('tenant_id', $user->tenant_id)
-                    ->where('is_active', true)
-                    ->first();
+                return Tenant::find($user->tenant_id);
             }
 
-            throw new \Exception('No store context available');
+            throw new \Exception('No tenant context available');
         }
     }
 
     public function addToCart($productId)
     {
-        $currentStore = $this->getCurrentStore();
-        $product = Product::byStore($currentStore->id)->find($productId);
+        $currentTenant = $this->getCurrentTenant();
+        $product = Product::byTenant($currentTenant->id)->find($productId);
 
         if (! $product || ! $product->is_active || $product->stock <= 0) {
             session()->flash('error', 'Produk tidak tersedia atau stok habis!');
@@ -191,8 +184,8 @@ class Cashier extends Component
 
     public function addProductByBarcode($barcode)
     {
-        $currentStore = $this->getCurrentStore();
-        $product = Product::byStore($currentStore->id)
+        $currentTenant = $this->getCurrentTenant();
+        $product = Product::byTenant($currentTenant->id)
             ->where('sku', $barcode)
             ->active()
             ->first();
@@ -309,11 +302,11 @@ class Cashier extends Component
         try {
             DB::beginTransaction();
 
-            $currentStore = $this->getCurrentStore();
+            $currentTenant = $this->getCurrentTenant();
 
             // Create transaction
             $transaction = Transaction::create([
-                'store_id' => $currentStore->id,
+                'tenant_id' => $currentTenant->id,
                 'customer_id' => $this->selectedCustomerId,
                 'user_id' => auth()->id(),
                 'transaction_number' => $this->transactionNumber,
@@ -380,10 +373,10 @@ class Cashier extends Component
             'newCustomerEmail' => 'nullable|email|max:255',
         ]);
 
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
 
         $customer = Customer::create([
-            'store_id' => $currentStore->id,
+            'tenant_id' => $currentTenant->id,
             'name' => $this->newCustomerName,
             'phone' => $this->newCustomerPhone,
             'email' => $this->newCustomerEmail,
@@ -418,9 +411,9 @@ class Cashier extends Component
 
     private function generateTransactionNumber()
     {
-        $currentStore = $this->getCurrentStore();
+        $currentTenant = $this->getCurrentTenant();
         $today = now()->format('Ymd');
-        $prefix = 'TRX-'.$currentStore->id.'-';
+        $prefix = 'TRX-'.$currentTenant->id.'-';
 
         // Get last transaction number for today
         $lastTransaction = Transaction::where('transaction_number', 'like', $prefix.'%'.$today)
