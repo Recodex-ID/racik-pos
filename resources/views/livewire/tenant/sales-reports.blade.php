@@ -22,37 +22,37 @@
         <div class="flex items-center justify-between mb-4">
             <flux:subheading>Jenis Laporan</flux:subheading>
         </div>
-        
+
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-            <flux:button 
+            <flux:button
                 wire:click="setReportType('daily')"
                 variant="{{ $reportType === 'daily' ? 'primary' : 'subtle' }}"
                 class="w-full"
             >
                 Harian
             </flux:button>
-            <flux:button 
+            <flux:button
                 wire:click="setReportType('weekly')"
                 variant="{{ $reportType === 'weekly' ? 'primary' : 'subtle' }}"
                 class="w-full"
             >
                 Mingguan
             </flux:button>
-            <flux:button 
+            <flux:button
                 wire:click="setReportType('monthly')"
                 variant="{{ $reportType === 'monthly' ? 'primary' : 'subtle' }}"
                 class="w-full"
             >
                 Bulanan
             </flux:button>
-            <flux:button 
+            <flux:button
                 wire:click="setReportType('yearly')"
                 variant="{{ $reportType === 'yearly' ? 'primary' : 'subtle' }}"
                 class="w-full"
             >
                 Tahunan
             </flux:button>
-            <flux:button 
+            <flux:button
                 wire:click="setReportType('custom')"
                 variant="{{ $reportType === 'custom' ? 'primary' : 'subtle' }}"
                 class="w-full"
@@ -65,31 +65,31 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @if($reportType === 'custom')
                 <div>
-                    <flux:input 
-                        type="date" 
-                        wire:model.live="customDateFrom" 
+                    <flux:input
+                        type="date"
+                        wire:model.live="customDateFrom"
                         placeholder="Dari Tanggal"
                     />
                 </div>
                 <div>
-                    <flux:input 
-                        type="date" 
-                        wire:model.live="customDateTo" 
+                    <flux:input
+                        type="date"
+                        wire:model.live="customDateTo"
                         placeholder="Sampai Tanggal"
                     />
                 </div>
             @else
                 <div>
-                    <flux:input 
-                        type="date" 
-                        wire:model.live="filterDateFrom" 
+                    <flux:input
+                        type="date"
+                        wire:model.live="filterDateFrom"
                         placeholder="Dari Tanggal"
                     />
                 </div>
                 <div>
-                    <flux:input 
-                        type="date" 
-                        wire:model.live="filterDateTo" 
+                    <flux:input
+                        type="date"
+                        wire:model.live="filterDateTo"
                         placeholder="Sampai Tanggal"
                     />
                 </div>
@@ -98,7 +98,7 @@
     </div>
 
     <!-- Sales Summary -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center justify-between">
                 <div>
@@ -126,21 +126,6 @@
             </div>
             <div class="mt-4">
                 <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Rp {{ number_format($this->salesSummary['total_revenue'], 0, ',', '.') }}</p>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Total Pajak</h3>
-                    <p class="text-sm text-zinc-600 dark:text-zinc-400">Pajak terkumpul</p>
-                </div>
-                <div class="rounded-full bg-purple-100 p-3 dark:bg-purple-900/20">
-                    <flux:icon.calculator class="h-6 w-6 text-purple-600" />
-                </div>
-            </div>
-            <div class="mt-4">
-                <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Rp {{ number_format($this->salesSummary['total_tax'], 0, ',', '.') }}</p>
             </div>
         </div>
 
@@ -181,7 +166,7 @@
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
             <h3 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Trend Penjualan</h3>
             <div class="h-64">
-                <canvas id="salesTrendChart" 
+                <canvas id="salesTrendChart"
                         data-trend-data="{{ json_encode($this->salesTrend) }}"></canvas>
             </div>
         </div>

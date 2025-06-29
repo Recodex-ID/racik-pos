@@ -270,12 +270,6 @@
                                 <span>-Rp {{ number_format($selectedTransaction->discount_amount, 0, ',', '.') }}</span>
                             </div>
                         @endif
-                        @if($selectedTransaction->tax_amount > 0)
-                            <div class="flex justify-between">
-                                <span>Pajak:</span>
-                                <span>Rp {{ number_format($selectedTransaction->tax_amount, 0, ',', '.') }}</span>
-                            </div>
-                        @endif
                         <hr class="my-2">
                         <div class="flex justify-between font-bold text-lg">
                             <span>Total:</span>

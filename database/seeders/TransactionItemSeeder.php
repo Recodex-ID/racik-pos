@@ -43,14 +43,12 @@ class TransactionItemSeeder extends Seeder
 
             // Update subtotal transaksi berdasarkan item yang dibuat
             $discountAmount = $transaction->discount_amount;
-            $taxAmount = ($calculatedSubtotal - $discountAmount) * 0.11;
-            $totalAmount = $calculatedSubtotal - $discountAmount + $taxAmount;
+            $totalAmount = $calculatedSubtotal - $discountAmount;
             $paymentAmount = $totalAmount + rand(0, 50000);
             $changeAmount = $paymentAmount - $totalAmount;
 
             $transaction->update([
                 'subtotal' => $calculatedSubtotal,
-                'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
                 'payment_amount' => $paymentAmount,
                 'change_amount' => $changeAmount,

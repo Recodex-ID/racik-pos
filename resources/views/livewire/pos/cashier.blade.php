@@ -220,10 +220,6 @@
                             <span>-Rp {{ number_format($discountAmount, 0, ',', '.') }}</span>
                         </div>
                     @endif
-                    <div class="flex justify-between">
-                        <span class="text-zinc-600 dark:text-zinc-400">Pajak ({{ $taxRate }}%)</span>
-                        <span class="font-medium">Rp {{ number_format($taxAmount, 0, ',', '.') }}</span>
-                    </div>
                     <div class="border-t border-zinc-200 dark:border-zinc-700 pt-3">
                         <div class="flex justify-between">
                             <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Total</span>

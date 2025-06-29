@@ -42,7 +42,6 @@ class SalesReports extends Component
         return [
             'total_transactions' => $query->count(),
             'total_revenue' => $query->sum('transactions.total_amount'),
-            'total_tax' => $query->sum('transactions.tax_amount'),
             'total_discount' => $query->sum('transactions.discount_amount'),
             'average_transaction' => $query->count() > 0 ? $query->sum('transactions.total_amount') / $query->count() : 0,
         ];

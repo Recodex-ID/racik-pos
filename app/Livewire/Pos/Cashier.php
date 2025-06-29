@@ -27,10 +27,6 @@ class Cashier extends Component
 
     public $discountAmount = 0;
 
-    public $taxRate = 11; // PPN 11%
-
-    public $taxAmount = 0;
-
     public $totalAmount = 0;
 
     public $paymentMethod = 'cash';
@@ -254,12 +250,8 @@ class Cashier extends Component
         // Ensure discount doesn't exceed subtotal
         $this->discountAmount = min($this->discountAmount, $this->subtotal);
 
-        // Calculate tax (after discount)
-        $taxableAmount = $this->subtotal - $this->discountAmount;
-        $this->taxAmount = ($taxableAmount * $this->taxRate) / 100;
-
         // Calculate total
-        $this->totalAmount = $this->subtotal - $this->discountAmount + $this->taxAmount;
+        $this->totalAmount = $this->subtotal - $this->discountAmount;
 
         // Calculate change
         if ($this->paymentAmount > 0) {
@@ -271,7 +263,7 @@ class Cashier extends Component
 
     public function updated($property)
     {
-        if (in_array($property, ['discountType', 'discountValue', 'taxRate', 'paymentAmount'])) {
+        if (in_array($property, ['discountType', 'discountValue', 'paymentAmount'])) {
             $this->calculateTotals();
         }
     }
@@ -313,7 +305,6 @@ class Cashier extends Component
                 'transaction_date' => now(),
                 'subtotal' => $this->subtotal,
                 'discount_amount' => $this->discountAmount,
-                'tax_amount' => $this->taxAmount,
                 'total_amount' => $this->totalAmount,
                 'payment_method' => $this->paymentMethod,
                 'payment_amount' => $this->paymentAmount,

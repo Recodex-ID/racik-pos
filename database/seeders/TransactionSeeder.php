@@ -32,8 +32,7 @@ class TransactionSeeder extends Seeder
 
                 $subtotal = rand(50000, 500000);
                 $discountAmount = rand(0, $subtotal * 0.1);
-                $taxAmount = ($subtotal - $discountAmount) * 0.11; // PPN 11%
-                $totalAmount = $subtotal - $discountAmount + $taxAmount;
+                $totalAmount = $subtotal - $discountAmount;
                 $paymentAmount = $totalAmount + rand(0, 50000); // Bisa lebih untuk kembalian
                 $changeAmount = $paymentAmount - $totalAmount;
 
@@ -45,7 +44,6 @@ class TransactionSeeder extends Seeder
                     'transaction_date' => $transactionDate,
                     'subtotal' => $subtotal,
                     'discount_amount' => $discountAmount,
-                    'tax_amount' => $taxAmount,
                     'total_amount' => $totalAmount,
                     'payment_method' => ['cash', 'card', 'transfer', 'qris'][rand(0, 3)],
                     'payment_amount' => $paymentAmount,
