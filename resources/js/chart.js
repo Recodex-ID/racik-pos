@@ -3,20 +3,32 @@ import Chart from 'chart.js/auto';
 // Global chart instances
 window.dashboardCharts = {
     systemOverview: null,
-    userTrend: null
+    userTrend: null,
+    todayTransaction: null,
+    weeklyTransaction: null
 };
 
 // Initialize charts function
 function initializeDashboardCharts() {
+    let initialized = false;
+    
     // Initialize admin charts if they exist
     const systemChartEl = document.getElementById('systemOverviewChart');
     const trendChartEl = document.getElementById('userTrendChart');
     
     if (systemChartEl && trendChartEl) {
-        return initializeAdminCharts();
+        initialized = initializeAdminCharts() || initialized;
     }
     
-    return false;
+    // Initialize transaction charts if they exist
+    const todayTransactionEl = document.getElementById('todayTransactionChart');
+    const weeklyTransactionEl = document.getElementById('weeklyTransactionChart');
+    
+    if (todayTransactionEl || weeklyTransactionEl) {
+        initialized = initializeTransactionCharts() || initialized;
+    }
+    
+    return initialized;
 }
 
 // Initialize admin charts function
@@ -126,6 +138,234 @@ function initializeAdminCharts() {
     }
 }
 
+// Initialize transaction charts function
+function initializeTransactionCharts() {
+    const todayChartEl = document.getElementById('todayTransactionChart');
+    const weeklyChartEl = document.getElementById('weeklyTransactionChart');
+    
+    if (!todayChartEl && !weeklyChartEl) {
+        return false;
+    }
+    
+    try {
+        let initialized = false;
+        
+        // Initialize Today Transaction Chart
+        if (todayChartEl) {
+            // Destroy existing chart
+            if (window.dashboardCharts.todayTransaction) {
+                window.dashboardCharts.todayTransaction.destroy();
+            }
+            
+            // Get chart data
+            const todayDataRaw = todayChartEl.dataset.chartData;
+            const todayData = JSON.parse(todayDataRaw || '{"labels":[],"revenue":[],"transactions":[]}');
+            
+            // Create Today Transaction Chart
+            const ctx1 = todayChartEl.getContext('2d');
+            window.dashboardCharts.todayTransaction = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: todayData.labels || [],
+                    datasets: [
+                        {
+                            label: 'Pendapatan (Rp)',
+                            data: todayData.revenue || [],
+                            borderColor: '#16A34A',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y',
+                            pointBackgroundColor: '#16A34A',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Jumlah Transaksi',
+                            data: todayData.transactions || [],
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: '#2563EB',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                color: getThemeColor()
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Pendapatan: Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                                    } else {
+                                        return 'Transaksi: ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getTickColor() },
+                            grid: { color: getGridColor() }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            ticks: { 
+                                color: getTickColor(),
+                                callback: function(value) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                                }
+                            },
+                            grid: { color: getGridColor() }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            ticks: { color: getTickColor() },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+            initialized = true;
+        }
+        
+        // Initialize Weekly Transaction Chart
+        if (weeklyChartEl) {
+            // Destroy existing chart
+            if (window.dashboardCharts.weeklyTransaction) {
+                window.dashboardCharts.weeklyTransaction.destroy();
+            }
+            
+            // Get chart data
+            const weeklyDataRaw = weeklyChartEl.dataset.chartData;
+            const weeklyData = JSON.parse(weeklyDataRaw || '{"labels":[],"revenue":[],"transactions":[]}');
+            
+            // Create Weekly Transaction Chart
+            const ctx2 = weeklyChartEl.getContext('2d');
+            window.dashboardCharts.weeklyTransaction = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: weeklyData.labels || [],
+                    datasets: [
+                        {
+                            label: 'Pendapatan (Rp)',
+                            data: weeklyData.revenue || [],
+                            backgroundColor: 'rgba(22, 163, 74, 0.8)',
+                            borderColor: '#16A34A',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Jumlah Transaksi',
+                            data: weeklyData.transactions || [],
+                            type: 'line',
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: '#2563EB',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                color: getThemeColor()
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Pendapatan: Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                                    } else {
+                                        return 'Transaksi: ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getTickColor() },
+                            grid: { color: getGridColor() }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            ticks: { 
+                                color: getTickColor(),
+                                callback: function(value) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                                }
+                            },
+                            grid: { color: getGridColor() }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            ticks: { color: getTickColor() },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+            initialized = true;
+        }
+        
+        return initialized;
+        
+    } catch (error) {
+        console.error('Error initializing transaction charts:', error);
+        return false;
+    }
+}
+
 // Theme color functions
 function getThemeColor() {
     return document.documentElement.classList.contains('dark') ? '#F4F4F5' : '#18181B';
@@ -177,7 +417,11 @@ function tryInitializeWithRetry() {
                                    document.getElementById('userTrendChart') &&
                                    (!window.dashboardCharts.systemOverview || !window.dashboardCharts.userTrend);
             
-            if (needsAdminCharts) {
+            // Check if transaction charts need initialization  
+            const needsTransactionCharts = (document.getElementById('todayTransactionChart') && !window.dashboardCharts.todayTransaction) ||
+                                         (document.getElementById('weeklyTransactionChart') && !window.dashboardCharts.weeklyTransaction);
+            
+            if (needsAdminCharts || needsTransactionCharts) {
                 initializeDashboardCharts();
             }
         }, delay);

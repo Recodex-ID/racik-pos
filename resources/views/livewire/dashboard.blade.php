@@ -175,6 +175,23 @@
         </div>
     </div>
 
+    <!-- Transaction Charts -->
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
+            <h3 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Tren Transaksi Hari Ini</h3>
+            <div class="h-64">
+                <canvas id="todayTransactionChart" data-chart-data="{{ json_encode($this->todayTransactionChart) }}"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
+            <h3 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Tren Transaksi 7 Hari</h3>
+            <div class="h-64">
+                <canvas id="weeklyTransactionChart" data-chart-data="{{ json_encode($this->weeklyTransactionChart) }}"></canvas>
+            </div>
+        </div>
+    </div>
+
     <!-- Today's Transactions List -->
     <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
         <div class="flex items-center justify-between mb-6">

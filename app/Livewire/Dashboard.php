@@ -93,6 +93,60 @@ class Dashboard extends Component
         ];
     }
 
+    #[Computed]
+    public function todayTransactionChart()
+    {
+        $hours = [];
+        $revenues = [];
+        $counts = [];
+
+        // Generate hourly data for today (6 AM to 10 PM)
+        for ($hour = 6; $hour <= 22; $hour++) {
+            $startTime = today()->setHour($hour)->setMinute(0)->setSecond(0);
+            $endTime = today()->setHour($hour)->setMinute(59)->setSecond(59);
+
+            $hourlyTransactions = Transaction::whereDate('transaction_date', today())
+                ->completed()
+                ->whereBetween('transaction_date', [$startTime, $endTime]);
+
+            $hours[] = $startTime->format('H:i');
+            $revenues[] = $hourlyTransactions->sum('total_amount');
+            $counts[] = $hourlyTransactions->count();
+        }
+
+        return [
+            'labels' => $hours,
+            'revenue' => $revenues,
+            'transactions' => $counts,
+        ];
+    }
+
+    #[Computed]
+    public function weeklyTransactionChart()
+    {
+        $last7Days = [];
+        $revenues = [];
+        $counts = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dateFormatted = $date->format('M j');
+
+            $dailyTransactions = Transaction::whereDate('transaction_date', $date->toDateString())
+                ->completed();
+
+            $last7Days[] = $dateFormatted;
+            $revenues[] = $dailyTransactions->sum('total_amount');
+            $counts[] = $dailyTransactions->count();
+        }
+
+        return [
+            'labels' => $last7Days,
+            'revenue' => $revenues,
+            'transactions' => $counts,
+        ];
+    }
+
     public function render()
     {
         return view('livewire.dashboard');
