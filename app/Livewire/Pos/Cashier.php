@@ -547,21 +547,41 @@ class Cashier extends Component
     {
         $currentTenant = $this->getCurrentTenant();
         $today = now()->format('Ymd');
-        $prefix = 'TRX-'.$currentTenant->id.'-';
-
-        // Get last transaction number for today
-        $lastTransaction = Transaction::where('transaction_number', 'like', $prefix.'%'.$today)
-            ->orderBy('transaction_number', 'desc')
-            ->first();
-
-        if ($lastTransaction) {
-            $lastNumber = (int) substr($lastTransaction->transaction_number, -8, 4);
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
+        $timestamp = now()->format('His'); // Hour, minute, second
+        $userId = auth()->id();
+        
+        // Generate unique transaction number using multiple components
+        // Format: TRX-{tenant_id}-{date}-{timestamp}-{user_id}
+        $this->transactionNumber = sprintf(
+            'TRX-%d-%s-%s-%d',
+            $currentTenant->id,
+            $today,
+            $timestamp,
+            $userId
+        );
+        
+        // Fallback: If somehow still duplicate, add microseconds
+        $attempts = 0;
+        while ($attempts < 5) {
+            $existingTransaction = Transaction::where('transaction_number', $this->transactionNumber)->first();
+            
+            if (!$existingTransaction) {
+                break; // Unique number found
+            }
+            
+            // Add microseconds for uniqueness
+            $microseconds = substr((string) microtime(true), -3);
+            $this->transactionNumber = sprintf(
+                'TRX-%d-%s-%s-%d-%s',
+                $currentTenant->id,
+                $today,
+                $timestamp,
+                $userId,
+                $microseconds
+            );
+            
+            $attempts++;
         }
-
-        $this->transactionNumber = $prefix.$newNumber.'-'.$today;
     }
 
     public function render()
