@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Tenant;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -13,6 +14,20 @@ use Spatie\Permission\Models\Role;
 
 class Dashboard extends Component
 {
+    private function getCurrentTenant()
+    {
+        $user = auth()->user();
+        if ($user && $user->tenant_id) {
+            return Tenant::find($user->tenant_id);
+        }
+        return null;
+    }
+
+    private function getTenantQuery()
+    {
+        $tenant = $this->getCurrentTenant();
+        return $tenant ? $tenant->id : null;
+    }
     #[Computed]
     public function totalUsers()
     {
@@ -74,51 +89,88 @@ class Dashboard extends Component
     #[Computed]
     public function totalTransactions()
     {
-        return Transaction::where('status', 'completed')->count();
+        $query = Transaction::where('status', 'completed');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->count();
     }
 
     #[Computed]
     public function totalSales()
     {
-        return Transaction::where('status', 'completed')->sum('total_amount');
+        $query = Transaction::where('status', 'completed');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->sum('total_amount');
     }
 
     #[Computed]
     public function todaySales()
     {
-        return Transaction::where('status', 'completed')
-            ->whereDate('transaction_date', today())
-            ->sum('total_amount');
+        $query = Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today());
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->sum('total_amount');
     }
 
     #[Computed]
     public function todayTransactions()
     {
-        return Transaction::where('status', 'completed')
-            ->whereDate('transaction_date', today())
-            ->count();
+        $query = Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today());
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->count();
     }
 
     #[Computed]
     public function totalProducts()
     {
-        return Product::count();
+        $query = Product::query();
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->count();
     }
 
     #[Computed]
     public function lowStockProducts()
     {
-        return Product::whereColumn('stock', '<=', 'min_stock')->count();
+        $query = Product::whereColumn('stock', '<=', 'min_stock');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->count();
     }
 
     #[Computed]
     public function recentTransactions()
     {
-        return Transaction::with(['customer', 'user', 'tenant'])
-            ->where('status', 'completed')
-            ->latest()
-            ->take(5)
-            ->get();
+        $query = Transaction::with(['customer', 'user', 'tenant'])
+            ->where('status', 'completed');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->latest()->take(5)->get();
     }
 
     #[Computed]
@@ -131,9 +183,14 @@ class Dashboard extends Component
             $date = Carbon::now()->subDays($i);
             $dateFormatted = $date->format('M j');
 
-            $salesAmount = Transaction::where('status', 'completed')
-                ->whereDate('transaction_date', $date->toDateString())
-                ->sum('total_amount');
+            $query = Transaction::where('status', 'completed')
+                ->whereDate('transaction_date', $date->toDateString());
+            
+            if ($tenantId = $this->getTenantQuery()) {
+                $query->where('tenant_id', $tenantId);
+            }
+            
+            $salesAmount = $query->sum('total_amount');
 
             $last7Days[] = $dateFormatted;
             $salesData[] = floatval($salesAmount);
@@ -148,8 +205,13 @@ class Dashboard extends Component
     #[Computed]
     public function salesByPaymentMethod()
     {
-        $paymentMethods = Transaction::where('status', 'completed')
-            ->selectRaw('payment_method, SUM(total_amount) as total')
+        $query = Transaction::where('status', 'completed');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        $paymentMethods = $query->selectRaw('payment_method, SUM(total_amount) as total')
             ->groupBy('payment_method')
             ->get();
 
@@ -166,9 +228,14 @@ class Dashboard extends Component
     #[Computed]
     public function lowStockProductsList()
     {
-        return Product::with('category')
-            ->whereColumn('stock', '<=', 'min_stock')
-            ->orderBy('stock', 'asc')
+        $query = Product::with('category')
+            ->whereColumn('stock', '<=', 'min_stock');
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        return $query->orderBy('stock', 'asc')
             ->take(5)
             ->get();
     }
@@ -176,9 +243,14 @@ class Dashboard extends Component
     #[Computed]
     public function todayTopProducts()
     {
-        return Transaction::where('transactions.status', 'completed')
-            ->whereDate('transactions.transaction_date', today())
-            ->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
+        $query = Transaction::where('transactions.status', 'completed')
+            ->whereDate('transactions.transaction_date', today());
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('transactions.tenant_id', $tenantId);
+        }
+        
+        return $query->join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
             ->selectRaw('products.name, products.sku, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
             ->groupBy('products.id', 'products.name', 'products.sku')
@@ -190,9 +262,14 @@ class Dashboard extends Component
     #[Computed]
     public function todayPaymentMethods()
     {
-        $paymentMethods = Transaction::where('status', 'completed')
-            ->whereDate('transaction_date', today())
-            ->selectRaw('payment_method, SUM(total_amount) as total, COUNT(*) as count')
+        $query = Transaction::where('status', 'completed')
+            ->whereDate('transaction_date', today());
+        
+        if ($tenantId = $this->getTenantQuery()) {
+            $query->where('tenant_id', $tenantId);
+        }
+        
+        $paymentMethods = $query->selectRaw('payment_method, SUM(total_amount) as total, COUNT(*) as count')
             ->groupBy('payment_method')
             ->get();
 

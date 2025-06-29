@@ -112,6 +112,18 @@
     @endrole
 
     @role('Admin|User')
+    <!-- Tenant Info -->
+    @if(auth()->user()->tenant)
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <flux:icon.building-office class="h-5 w-5 text-blue-600 mr-2" />
+                <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Dashboard untuk: {{ auth()->user()->tenant->name }}
+                </span>
+            </div>
+        </div>
+    @endif
+    
     <!-- POS Metrics Section -->
     <div class="grid auto-rows-min gap-6 md:grid-cols-4">
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
