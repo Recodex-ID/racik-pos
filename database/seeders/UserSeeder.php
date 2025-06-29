@@ -11,13 +11,13 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenant = Tenant::where('name', 'MachineCoffeeSMI')->first();
+        $tenant = Tenant::where('name', 'Machine Coffee SMI')->first();
 
         if ($tenant) {
             // Akun Admin
             $admin = User::create([
-                'name' => 'machine_coffee_',
-                'username' => 'machine',
+                'name' => 'Machine',
+                'username' => 'machine_coffee_',
                 'email' => 'pengkorstyle48@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('Machine24'),
@@ -28,8 +28,8 @@ class UserSeeder extends Seeder
 
             // Akun Kasir
             $cashier = User::create([
-                'name' => 'mesinkopi',
-                'username' => 'mesin',
+                'name' => 'Mesin',
+                'username' => 'mesinkopi',
                 'email' => 'kasir.pengkorstyle48@gmail.com', // Modified to avoid duplicate email
                 'email_verified_at' => now(),
                 'password' => Hash::make('Mesinkopi24'),

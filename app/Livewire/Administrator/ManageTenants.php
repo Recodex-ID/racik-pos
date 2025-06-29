@@ -74,10 +74,10 @@ class ManageTenants extends Component
         if ($this->editingTenantId) {
             $tenant = Tenant::findOrFail($this->editingTenantId);
             $tenant->update($tenantData);
-            $message = 'Tenant berhasil diperbarui!';
+            $message = 'Tenant successfully updated!';
         } else {
             Tenant::create($tenantData);
-            $message = 'Tenant berhasil dibuat!';
+            $message = 'Tenant successfully created!';
         }
 
         $this->reset(['name', 'address', 'is_active', 'editingTenantId']);
@@ -89,7 +89,7 @@ class ManageTenants extends Component
     public function delete($tenantId)
     {
         Tenant::findOrFail($tenantId)->delete();
-        session()->flash('message', 'Tenant berhasil dihapus!');
+        session()->flash('message', 'Tenant successfully deleted!');
 
         $this->modal("delete-tenant-{$tenantId}")->close();
     }

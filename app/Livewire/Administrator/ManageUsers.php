@@ -32,6 +32,8 @@ class ManageUsers extends Component
 
     public $search = '';
 
+    public $showSuperAdmins = false;
+
     public function rules(): array
     {
         $rules = [
@@ -59,6 +61,9 @@ class ManageUsers extends Component
     public function users()
     {
         return User::with(['roles', 'tenant'])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', '!=', 'Super Admin');
+            })
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%')
                     ->orWhere('username', 'like', '%'.$this->search.'%')
@@ -66,6 +71,22 @@ class ManageUsers extends Component
             })
             ->latest()
             ->paginate(10);
+    }
+
+    #[Computed]
+    public function superAdmins()
+    {
+        return User::with(['roles', 'tenant'])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Super Admin');
+            })
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('username', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
+            })
+            ->latest()
+            ->get();
     }
 
     #[Computed]
@@ -138,6 +159,12 @@ class ManageUsers extends Component
 
         // Close the confirmation modal after delete
         $this->modal("delete-user-{$userId}")->close();
+    }
+
+    public function toggleSuperAdminView()
+    {
+        $this->showSuperAdmins = ! $this->showSuperAdmins;
+        $this->resetPage(); // Reset pagination when switching views
     }
 
     public function resetForm()

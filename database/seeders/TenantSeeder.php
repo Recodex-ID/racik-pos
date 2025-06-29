@@ -11,7 +11,7 @@ class TenantSeeder extends Seeder
     {
         $tenants = [
             [
-                'name' => 'MachineCoffeeSMI',
+                'name' => 'Machine Coffee SMI',
                 'address' => 'JL. Babakan Sirna no.25',
                 'is_active' => true,
             ],
