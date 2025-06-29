@@ -24,7 +24,7 @@
                     <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ auth()->user()->name }}</div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <flux:button wire:click="$set('showDraftsModal', true)" variant="outline" size="sm" icon="document-text">
+                    <flux:button wire:click="$set('showDraftsModal', true)" variant="primary" color="yellow" size="sm" icon="document-text">
                         Draft ({{ $this->drafts->count() }})
                     </flux:button>
                     <flux:button wire:click="$set('showCartModal', true)" variant="primary" color="blue" size="sm" icon="shopping-cart">
@@ -435,7 +435,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Draft Items Preview -->
                                 <div class="mb-3">
                                     <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
@@ -458,7 +458,7 @@
                                     </flux:button>
                                     <flux:button
                                         wire:click="deleteDraft({{ $draft->id }})"
-                                        variant="outline"
+                                        variant="primary"
                                         color="red"
                                         size="sm"
                                         icon="trash"

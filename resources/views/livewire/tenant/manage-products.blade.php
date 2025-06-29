@@ -79,7 +79,7 @@
                             <div class="text-xs text-zinc-500 dark:text-zinc-400">HPP: Rp {{ number_format($product->cost, 0, ',', '.') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <flux:badge variant="{{ $product->is_active ? 'primary' : 'outline' }}" size="sm">
+                            <flux:badge color="{{ $product->is_active ? 'green' : 'red' }}" size="sm">
                                 {{ $product->is_active ? 'Aktif' : 'Tidak Aktif' }}
                             </flux:badge>
                         </td>
@@ -132,102 +132,91 @@
                     </flux:text>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <flux:heading size="md">Informasi Produk</flux:heading>
+                <flux:field>
+                    <flux:label>Nama Produk</flux:label>
+                    <flux:input wire:model="name" placeholder="Masukkan nama produk..." />
+                    <flux:error name="name" />
+                </flux:field>
 
-                        <flux:field>
-                            <flux:label>Nama Produk</flux:label>
-                            <flux:input wire:model="name" placeholder="Masukkan nama produk..." />
-                            <flux:error name="name" />
-                        </flux:field>
+                <flux:field>
+                    <flux:label>Deskripsi</flux:label>
+                    <flux:textarea wire:model="description" placeholder="Deskripsi produk (opsional)..." rows="3" />
+                    <flux:error name="description" />
+                </flux:field>
 
-                        <flux:field>
-                            <flux:label>Deskripsi</flux:label>
-                            <flux:textarea wire:model="description" placeholder="Deskripsi produk (opsional)..." rows="3" />
-                            <flux:error name="description" />
-                        </flux:field>
-
-                        <flux:field>
-                            <flux:label>Gambar Produk</flux:label>
-                            <div class="space-y-3">
-                                @if($existingImage && !$image)
-                                    <div class="flex items-center space-x-3">
-                                        <img src="{{ Storage::url($existingImage) }}" alt="Current image" class="h-20 w-20 rounded-lg object-cover">
-                                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Gambar saat ini</div>
-                                    </div>
-                                @endif
-                                
-                                @if($image)
-                                    <div class="flex items-center space-x-3">
-                                        <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="h-20 w-20 rounded-lg object-cover">
-                                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Preview gambar baru</div>
-                                    </div>
-                                @endif
-                                
-                                <flux:input type="file" wire:model="image" accept="image/*" />
-                                <flux:error name="image" />
-                                <flux:description>
-                                    Upload gambar produk (maksimal 2MB)
-                                </flux:description>
-                            </div>
-                        </flux:field>
-
-                        <flux:field>
-                            <flux:label>Kategori</flux:label>
-                            <flux:select wire:model="category_id" placeholder="Pilih kategori...">
-                                @foreach ($this->categories as $category)
-                                    <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
-                                @endforeach
-                            </flux:select>
-                            <flux:error name="category_id" />
-                        </flux:field>
-                    </div>
-
-                    <div class="space-y-4">
-                        <flux:heading size="md">Harga & Inventory</flux:heading>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <flux:field>
-                                <flux:label>Harga Jual</flux:label>
-                                <flux:input wire:model="price" type="number" step="0.01" placeholder="0" />
-                                <flux:error name="price" />
-                            </flux:field>
-
-                            <flux:field>
-                                <flux:label>Harga Pokok (HPP)</flux:label>
-                                <flux:input wire:model="cost" type="number" step="0.01" placeholder="0" />
-                                <flux:error name="cost" />
-                            </flux:field>
-                        </div>
-
-
-                        <flux:field>
-                            <flux:label>Status</flux:label>
-                            <flux:checkbox wire:model="is_active" label="Produk Aktif" />
-                            <flux:error name="is_active" />
-                            <flux:description>
-                                Produk aktif dapat dijual di kasir
-                            </flux:description>
-                        </flux:field>
-
-                        @if($price && $cost)
-                            <div class="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-                                <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">Analisis Margin</div>
-                                <div class="space-y-1 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-zinc-600 dark:text-zinc-400">Margin:</span>
-                                        <span class="font-medium">Rp {{ number_format($price - $cost, 0, ',', '.') }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-zinc-600 dark:text-zinc-400">Margin %:</span>
-                                        <span class="font-medium">{{ $cost > 0 ? round((($price - $cost) / $cost) * 100, 1) : 0 }}%</span>
-                                    </div>
-                                </div>
+                <flux:field>
+                    <flux:label>Gambar Produk</flux:label>
+                    <div class="space-y-3">
+                        @if($existingImage && !$image)
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ Storage::url($existingImage) }}" alt="Current image" class="h-20 w-20 rounded-lg object-cover">
+                                <div class="text-sm text-zinc-600 dark:text-zinc-400">Gambar saat ini</div>
                             </div>
                         @endif
+
+                        @if($image)
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="h-20 w-20 rounded-lg object-cover">
+                                <div class="text-sm text-zinc-600 dark:text-zinc-400">Preview gambar baru</div>
+                            </div>
+                        @endif
+
+                        <flux:input type="file" wire:model="image" accept="image/*" />
+                        <flux:error name="image" />
+                        <flux:description>
+                            Upload gambar produk (maksimal 2MB)
+                        </flux:description>
                     </div>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Kategori</flux:label>
+                    <flux:select wire:model="category_id" placeholder="Pilih kategori...">
+                        @foreach ($this->categories as $category)
+                            <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="category_id" />
+                </flux:field>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label>Harga Pokok (HPP)</flux:label>
+                        <flux:input wire:model="cost" type="number" step="0.01" placeholder="0" />
+                        <flux:error name="cost" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>Harga Jual</flux:label>
+                        <flux:input wire:model="price" type="number" step="0.01" placeholder="0" />
+                        <flux:error name="price" />
+                    </flux:field>
                 </div>
+
+                <flux:field>
+                    <flux:label>Status</flux:label>
+                    <flux:checkbox wire:model="is_active" label="Aktif" />
+                    <flux:error name="is_active" />
+                    <flux:description>
+                        Produk aktif dapat dijual di kasir
+                    </flux:description>
+                </flux:field>
+
+                @if($price && $cost)
+                    <div class="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                        <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">Analisis Margin</div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-600 dark:text-zinc-400">Margin:</span>
+                                <span class="font-medium">Rp {{ number_format($price - $cost, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-600 dark:text-zinc-400">Margin %:</span>
+                                <span class="font-medium">{{ $cost > 0 ? round((($price - $cost) / $cost) * 100, 1) : 0 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <div class="flex gap-2">
                     <flux:spacer />

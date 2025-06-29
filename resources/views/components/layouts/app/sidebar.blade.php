@@ -32,8 +32,8 @@
 
                 @hasrole('Admin')
                 <flux:navlist.group :heading="__('Toko')" class="grid">
-                    <flux:navlist.item icon="folder" :href="route('tenant.categories')" :current="request()->routeIs('tenant.categories')" wire:navigate>Kategori Produk</flux:navlist.item>
-                    <flux:navlist.item icon="cube" :href="route('tenant.products')" :current="request()->routeIs('tenant.products')" wire:navigate>Produk & Inventory</flux:navlist.item>
+                    <flux:navlist.item icon="folder" :href="route('tenant.categories')" :current="request()->routeIs('tenant.categories')" wire:navigate>Kategori</flux:navlist.item>
+                    <flux:navlist.item icon="cube" :href="route('tenant.products')" :current="request()->routeIs('tenant.products')" wire:navigate>Produk</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('tenant.customers')" :current="request()->routeIs('tenant.customers')" wire:navigate>Pelanggan</flux:navlist.item>
                 </flux:navlist.group>
                 @endhasrole

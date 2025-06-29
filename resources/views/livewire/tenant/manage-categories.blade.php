@@ -48,7 +48,7 @@
                             </flux:badge>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                            <flux:badge variant="{{ $category->is_active ? 'primary' : 'outline' }}" size="sm">
+                            <flux:badge color="{{ $category->is_active ? 'green' : 'red' }}" size="sm">
                                 {{ $category->is_active ? 'Aktif' : 'Tidak Aktif' }}
                             </flux:badge>
                         </td>

@@ -20,7 +20,7 @@
 
     <!-- Customer Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center">
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                     <flux:icon name="users" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center">
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
                     <flux:icon name="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center">
                 <div class="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
                     <flux:icon name="x-circle" class="w-5 h-5 text-red-600 dark:text-red-400" />
@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center">
                 <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
                     <flux:icon name="credit-card" class="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -167,7 +167,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <flux:badge variant="{{ $customer->is_active ? 'primary' : 'outline' }}" size="sm">
+                            <flux:badge color="{{ $customer->is_active ? 'green' : 'red' }}" size="sm">
                                 {{ $customer->is_active ? 'Aktif' : 'Tidak Aktif' }}
                             </flux:badge>
                         </td>
@@ -255,7 +255,7 @@
 
                 <flux:field>
                     <flux:label>Status</flux:label>
-                    <flux:checkbox wire:model="is_active" label="Pelanggan Aktif" />
+                    <flux:checkbox wire:model="is_active" label="Aktif" />
                     <flux:error name="is_active" />
                     <flux:description>
                         Pelanggan aktif dapat dipilih dalam transaksi
