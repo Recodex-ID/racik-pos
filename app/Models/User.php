@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,14 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'username',
@@ -30,21 +25,11 @@ class User extends Authenticatable
         'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -54,9 +39,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
     public function initials(): string
     {
         return Str::of($this->name)
@@ -66,9 +48,6 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    /**
-     * Multi-tenant relationships
-     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
@@ -79,22 +58,16 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class);
     }
 
-    /**
-     * Multi-tenant scopes
-     */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeByTenant($query, $tenantId)
+    public function scopeByTenant(Builder $query, $tenantId): Builder
     {
         return $query->where('tenant_id', $tenantId);
     }
 
-    /**
-     * Helper methods for multi-tenant
-     */
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('Super Admin');

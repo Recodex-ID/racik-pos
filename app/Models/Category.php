@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,12 +33,12 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeByTenant($query, $tenantId)
+    public function scopeByTenant(Builder $query, $tenantId): Builder
     {
         return $query->where('tenant_id', $tenantId);
     }

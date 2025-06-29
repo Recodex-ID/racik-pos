@@ -83,7 +83,7 @@ class Dashboard extends Component
     public function todayTransactionStats()
     {
         $completedTransactions = Transaction::whereDate('transaction_date', today())->completed();
-        $pendingTransactions = Transaction::whereDate('transaction_date', today())->where('status', 'pending');
+        $pendingTransactions = Transaction::whereDate('transaction_date', today())->where('status', Transaction::STATUS_PENDING);
 
         return [
             'total_transactions' => $completedTransactions->count(),

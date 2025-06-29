@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,8 +17,9 @@ class TransactionItem extends Model
     ];
 
     protected $casts = [
-        'unit_price' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'quantity' => 'integer',
+        'unit_price' => 'decimal:10,2',
+        'total_price' => 'decimal:12,2',
     ];
 
     public function transaction(): BelongsTo
@@ -28,5 +30,15 @@ class TransactionItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function scopeByTransaction(Builder $query, $transactionId): Builder
+    {
+        return $query->where('transaction_id', $transactionId);
+    }
+
+    public function scopeByProduct(Builder $query, $productId): Builder
+    {
+        return $query->where('product_id', $productId);
     }
 }

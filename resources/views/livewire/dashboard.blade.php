@@ -231,9 +231,9 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($transaction->status === 'completed')
+                                    @if($transaction->status === \App\Models\Transaction::STATUS_COMPLETED)
                                         <flux:badge color="green" size="sm">Selesai</flux:badge>
-                                    @elseif($transaction->status === 'pending')
+                                    @elseif($transaction->status === \App\Models\Transaction::STATUS_PENDING)
                                         <flux:badge color="orange" size="sm">Pending</flux:badge>
                                     @else
                                         <flux:badge color="zinc" size="sm">{{ ucfirst($transaction->status) }}</flux:badge>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,8 +24,8 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'cost' => 'decimal:2',
+        'price' => 'decimal:10,2',
+        'cost' => 'decimal:10,2',
         'is_active' => 'boolean',
     ];
 
@@ -43,12 +44,12 @@ class Product extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeByTenant($query, $tenantId)
+    public function scopeByTenant(Builder $query, $tenantId): Builder
     {
         return $query->where('tenant_id', $tenantId);
     }

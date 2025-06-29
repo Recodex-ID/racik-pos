@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Transaction extends Model
 {
     use SoftDeletes;
+
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'tenant_id',
@@ -29,11 +34,11 @@ class Transaction extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'subtotal' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'payment_amount' => 'decimal:2',
-        'change_amount' => 'decimal:2',
+        'subtotal' => 'decimal:12,2',
+        'discount_amount' => 'decimal:12,2',
+        'total_amount' => 'decimal:12,2',
+        'payment_amount' => 'decimal:12,2',
+        'change_amount' => 'decimal:12,2',
     ];
 
     public function tenant(): BelongsTo
@@ -56,23 +61,28 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
-    public function scopeByTenant($query, $tenantId)
+    public function scopeByTenant(Builder $query, $tenantId): Builder
     {
         return $query->where('tenant_id', $tenantId);
     }
 
-    public function scopeByStatus($query, $status)
+    public function scopeByStatus(Builder $query, $status): Builder
     {
         return $query->where('status', $status);
     }
 
-    public function scopeDrafts($query)
+    public function scopeDrafts(Builder $query): Builder
     {
-        return $query->where('status', 'pending')->where('payment_amount', 0);
+        return $query->where('status', self::STATUS_PENDING)->where('payment_amount', 0);
     }
 
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_CANCELLED);
     }
 }

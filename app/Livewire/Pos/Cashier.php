@@ -225,7 +225,7 @@ class Cashier extends Component
                     'payment_method' => 'cash', // Default for draft
                     'payment_amount' => 0, // 0 indicates draft
                     'change_amount' => 0,
-                    'status' => 'pending', // Use pending status for draft
+                    'status' => Transaction::STATUS_PENDING, // Use pending status for draft
                     'notes' => $this->notes,
                 ]);
 
@@ -451,7 +451,7 @@ class Cashier extends Component
                 'payment_method' => $this->paymentMethod,
                 'payment_amount' => $this->paymentAmount,
                 'change_amount' => $this->changeAmount,
-                'status' => 'completed',
+                'status' => Transaction::STATUS_COMPLETED,
                 'notes' => $this->notes,
             ]);
 
