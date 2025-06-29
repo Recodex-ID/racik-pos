@@ -226,7 +226,16 @@ function initializeTransactionCharts() {
                     },
                     scales: {
                         x: {
-                            ticks: { color: getTickColor() },
+                            ticks: { 
+                                color: getTickColor(),
+                                maxTicksLimit: 12,
+                                callback: function(value, index) {
+                                    const label = this.getLabelForValue(value);
+                                    const hour = parseInt(label.split(':')[0]);
+                                    // Show only even hours for better readability
+                                    return hour % 2 === 0 ? label : '';
+                                }
+                            },
                             grid: { color: getGridColor() }
                         },
                         y: {
