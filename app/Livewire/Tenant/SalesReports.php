@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tenant;
 
-use App\Models\Transaction;
 use App\Models\Tenant;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -11,9 +11,13 @@ use Livewire\Component;
 class SalesReports extends Component
 {
     public $reportType = 'daily'; // daily, weekly, monthly, yearly, custom
+
     public $filterDateFrom = '';
+
     public $filterDateTo = '';
+
     public $customDateFrom = '';
+
     public $customDateTo = '';
 
     public function mount()
@@ -56,7 +60,7 @@ class SalesReports extends Component
             ->get();
 
         return [
-            'labels' => $data->pluck('payment_method')->map(fn($method) => ucfirst($method))->toArray(),
+            'labels' => $data->pluck('payment_method')->map(fn ($method) => ucfirst($method))->toArray(),
             'data' => $data->pluck('total')->toArray(),
             'counts' => $data->pluck('count')->toArray(),
         ];
@@ -83,7 +87,7 @@ class SalesReports extends Component
                 for ($i = 11; $i >= 0; $i--) {
                     $startWeek = now()->subWeeks($i)->startOfWeek();
                     $endWeek = now()->subWeeks($i)->endOfWeek();
-                    $labels[] = 'Week ' . $startWeek->weekOfMonth . ' ' . $startWeek->format('M');
+                    $labels[] = 'Week '.$startWeek->weekOfMonth.' '.$startWeek->format('M');
                     $data[] = (clone $query)->whereBetween('transactions.transaction_date', [$startWeek, $endWeek])->sum('transactions.total_amount');
                 }
                 break;

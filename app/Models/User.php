@@ -74,7 +74,6 @@ class User extends Authenticatable
         return $this->belongsTo(Tenant::class);
     }
 
-
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
@@ -93,7 +92,6 @@ class User extends Authenticatable
         return $query->where('tenant_id', $tenantId);
     }
 
-
     /**
      * Helper methods for multi-tenant
      */
@@ -111,5 +109,4 @@ class User extends Authenticatable
     {
         return $this->isSuperAdmin() || $this->tenant_id == $tenantId;
     }
-
 }

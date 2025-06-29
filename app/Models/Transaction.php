@@ -65,4 +65,14 @@ class Transaction extends Model
     {
         return $query->where('status', $status);
     }
+
+    public function scopeDrafts($query)
+    {
+        return $query->where('status', 'pending')->where('payment_amount', 0);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
 }

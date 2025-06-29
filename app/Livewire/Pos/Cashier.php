@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pos;
 
+use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Tenant;
@@ -14,6 +15,8 @@ use Livewire\Component;
 class Cashier extends Component
 {
     public $productSearch = '';
+
+    public $selectedCategoryId = null;
 
     public $selectedCustomerId = null;
 
@@ -41,6 +44,12 @@ class Cashier extends Component
 
     public $showPaymentModal = false;
 
+    public $showCartModal = false;
+
+    public $showDraftsModal = false;
+
+    public $currentDraftId = null;
+
     public $newCustomerName = '';
 
     public $newCustomerPhone = '';
@@ -48,7 +57,6 @@ class Cashier extends Component
     public $newCustomerEmail = '';
 
     public $transactionNumber = '';
-
 
     public function rules(): array
     {
@@ -75,6 +83,11 @@ class Cashier extends Component
             ->active()
             ->with('category');
 
+        // Filter berdasarkan kategori yang dipilih
+        if ($this->selectedCategoryId) {
+            $query->where('category_id', $this->selectedCategoryId);
+        }
+
         // Jika ada pencarian, filter berdasarkan pencarian
         if (strlen($this->productSearch) > 0) {
             $query->where(function ($q) {
@@ -96,6 +109,30 @@ class Cashier extends Component
         return Customer::byTenant($currentTenant->id)
             ->active()
             ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function categories()
+    {
+        $currentTenant = $this->getCurrentTenant();
+
+        return Category::byTenant($currentTenant->id)
+            ->active()
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function drafts()
+    {
+        $currentTenant = $this->getCurrentTenant();
+
+        return Transaction::byTenant($currentTenant->id)
+            ->drafts()
+            ->where('user_id', auth()->id())
+            ->with(['customer', 'transactionItems.product'])
+            ->orderBy('updated_at', 'desc')
             ->get();
     }
 
@@ -139,6 +176,144 @@ class Cashier extends Component
         }
     }
 
+    public function selectCategory($categoryId = null)
+    {
+        $this->selectedCategoryId = $categoryId;
+        $this->productSearch = '';
+    }
+
+    public function saveToDraft()
+    {
+        if (empty($this->cart)) {
+            session()->flash('error', 'Keranjang masih kosong!');
+
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $currentTenant = $this->getCurrentTenant();
+
+            // If this is an update to existing draft
+            if ($this->currentDraftId) {
+                $transaction = Transaction::find($this->currentDraftId);
+                if ($transaction) {
+                    // Delete existing transaction items
+                    $transaction->transactionItems()->delete();
+
+                    // Update transaction data
+                    $transaction->update([
+                        'customer_id' => $this->selectedCustomerId,
+                        'subtotal' => $this->subtotal,
+                        'discount_amount' => $this->discountAmount,
+                        'total_amount' => $this->totalAmount,
+                        'notes' => $this->notes,
+                    ]);
+                }
+            } else {
+                // Create new draft transaction
+                $transaction = Transaction::create([
+                    'tenant_id' => $currentTenant->id,
+                    'customer_id' => $this->selectedCustomerId,
+                    'user_id' => auth()->id(),
+                    'transaction_number' => $this->transactionNumber,
+                    'transaction_date' => now(),
+                    'subtotal' => $this->subtotal,
+                    'discount_amount' => $this->discountAmount,
+                    'total_amount' => $this->totalAmount,
+                    'payment_method' => 'cash', // Default for draft
+                    'payment_amount' => 0, // 0 indicates draft
+                    'change_amount' => 0,
+                    'status' => 'pending', // Use pending status for draft
+                    'notes' => $this->notes,
+                ]);
+
+                $this->currentDraftId = $transaction->id;
+            }
+
+            // Create transaction items
+            foreach ($this->cart as $item) {
+                TransactionItem::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['price'],
+                    'total_price' => $item['price'] * $item['quantity'],
+                ]);
+            }
+
+            DB::commit();
+
+            session()->flash('success', 'Draft berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Terjadi kesalahan saat menyimpan draft: '.$e->getMessage());
+        }
+    }
+
+    public function loadDraft($draftId)
+    {
+        $currentTenant = $this->getCurrentTenant();
+
+        $draft = Transaction::byTenant($currentTenant->id)
+            ->drafts()
+            ->where('user_id', auth()->id())
+            ->with(['customer', 'transactionItems.product'])
+            ->find($draftId);
+
+        if (! $draft) {
+            session()->flash('error', 'Draft tidak ditemukan!');
+
+            return;
+        }
+
+        // Load draft data
+        $this->currentDraftId = $draft->id;
+        $this->selectedCustomerId = $draft->customer_id;
+        $this->discountValue = $this->discountType === 'percentage'
+            ? ($draft->discount_amount / $draft->subtotal) * 100
+            : $draft->discount_amount;
+        $this->notes = $draft->notes;
+        $this->transactionNumber = $draft->transaction_number;
+
+        // Load cart from transaction items
+        $this->cart = [];
+        foreach ($draft->transactionItems as $item) {
+            $cartKey = 'product_'.$item->product_id;
+            $this->cart[$cartKey] = [
+                'product_id' => $item->product_id,
+                'name' => $item->product->name,
+                'price' => $item->unit_price,
+                'quantity' => $item->quantity,
+            ];
+        }
+
+        $this->calculateTotals();
+        $this->showDraftsModal = false;
+        $this->showCartModal = true;
+
+        session()->flash('success', 'Draft berhasil dimuat!');
+    }
+
+    public function deleteDraft($draftId)
+    {
+        $currentTenant = $this->getCurrentTenant();
+
+        $draft = Transaction::byTenant($currentTenant->id)
+            ->drafts()
+            ->where('user_id', auth()->id())
+            ->find($draftId);
+
+        if ($draft) {
+            $draft->delete();
+            session()->flash('success', 'Draft berhasil dihapus!');
+        } else {
+            session()->flash('error', 'Draft tidak ditemukan!');
+        }
+    }
+
     public function addToCart($productId)
     {
         $currentTenant = $this->getCurrentTenant();
@@ -167,7 +342,6 @@ class Cashier extends Component
         $this->productSearch = '';
         session()->flash('success', "Produk {$product->name} ditambahkan ke keranjang!");
     }
-
 
     public function updateQuantity($cartItemKey, $quantity)
     {
@@ -356,6 +530,7 @@ class Cashier extends Component
             'changeAmount',
             'notes',
             'showPaymentModal',
+            'currentDraftId',
         ]);
 
         $this->discountType = 'percentage';

@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tenant;
 
-use App\Models\Transaction;
 use App\Models\Tenant;
+use App\Models\Transaction;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,11 +13,17 @@ class ManageTransactions extends Component
     use WithPagination;
 
     public $search = '';
+
     public $filterStatus = '';
+
     public $filterPaymentMethod = '';
+
     public $filterDateFrom = '';
+
     public $filterDateTo = '';
+
     public $showDetailModal = false;
+
     public $selectedTransaction = null;
 
     public function mount()
@@ -41,13 +47,13 @@ class ManageTransactions extends Component
             ->byTenant($this->getCurrentTenant()->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('transaction_number', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('customer', function ($customer) {
-                          $customer->where('name', 'like', '%' . $this->search . '%');
-                      })
-                      ->orWhereHas('user', function ($user) {
-                          $user->where('name', 'like', '%' . $this->search . '%');
-                      });
+                    $q->where('transaction_number', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('customer', function ($customer) {
+                            $customer->where('name', 'like', '%'.$this->search.'%');
+                        })
+                        ->orWhereHas('user', function ($user) {
+                            $user->where('name', 'like', '%'.$this->search.'%');
+                        });
                 });
             })
             ->when($this->filterStatus, function ($query) {
@@ -105,6 +111,7 @@ class ManageTransactions extends Component
     public function averageAmount()
     {
         $total = $this->getFilteredQuery()->count();
+
         return $total > 0 ? $this->totalAmount / $total : 0;
     }
 
@@ -114,13 +121,13 @@ class ManageTransactions extends Component
             ->byTenant($this->getCurrentTenant()->id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('transaction_number', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('customer', function ($customer) {
-                          $customer->where('name', 'like', '%' . $this->search . '%');
-                      })
-                      ->orWhereHas('user', function ($user) {
-                          $user->where('name', 'like', '%' . $this->search . '%');
-                      });
+                    $q->where('transaction_number', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('customer', function ($customer) {
+                            $customer->where('name', 'like', '%'.$this->search.'%');
+                        })
+                        ->orWhereHas('user', function ($user) {
+                            $user->where('name', 'like', '%'.$this->search.'%');
+                        });
                 });
             })
             ->when($this->filterStatus, function ($query) {
@@ -143,7 +150,7 @@ class ManageTransactions extends Component
             'customer',
             'user',
             'tenant',
-            'transactionItems.product.category'
+            'transactionItems.product.category',
         ])->find($transactionId);
 
         $this->showDetailModal = true;

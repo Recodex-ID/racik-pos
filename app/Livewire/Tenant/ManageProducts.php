@@ -68,7 +68,6 @@ class ManageProducts extends Component
                 $query->where('category_id', $this->filterCategory);
             });
 
-
         return $query->latest()->paginate(10);
     }
 
@@ -117,7 +116,6 @@ class ManageProducts extends Component
             throw new \Exception('No tenant context available');
         }
     }
-
 
     public function create()
     {
@@ -180,7 +178,6 @@ class ManageProducts extends Component
         session()->flash('message', $message);
     }
 
-
     public function delete($productId)
     {
         $currentTenant = $this->getCurrentTenant();
@@ -206,7 +203,6 @@ class ManageProducts extends Component
         $this->reset(['name', 'description', 'image', 'existingImage', 'price', 'cost', 'category_id', 'is_active', 'editingProductId']);
         $this->resetValidation();
     }
-
 
     public function render()
     {

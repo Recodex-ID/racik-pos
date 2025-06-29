@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Models\User;
-use App\Models\Transaction;
 use App\Models\Product;
 use App\Models\Tenant;
+use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -20,14 +20,17 @@ class Dashboard extends Component
         if ($user && $user->tenant_id) {
             return Tenant::find($user->tenant_id);
         }
+
         return null;
     }
 
     private function getTenantQuery()
     {
         $tenant = $this->getCurrentTenant();
+
         return $tenant ? $tenant->id : null;
     }
+
     #[Computed]
     public function totalUsers()
     {
@@ -90,11 +93,11 @@ class Dashboard extends Component
     public function totalTransactions()
     {
         $query = Transaction::where('status', 'completed');
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->count();
     }
 
@@ -102,11 +105,11 @@ class Dashboard extends Component
     public function totalSales()
     {
         $query = Transaction::where('status', 'completed');
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->sum('total_amount');
     }
 
@@ -115,11 +118,11 @@ class Dashboard extends Component
     {
         $query = Transaction::where('status', 'completed')
             ->whereDate('transaction_date', today());
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->sum('total_amount');
     }
 
@@ -128,11 +131,11 @@ class Dashboard extends Component
     {
         $query = Transaction::where('status', 'completed')
             ->whereDate('transaction_date', today());
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->count();
     }
 
@@ -140,25 +143,24 @@ class Dashboard extends Component
     public function totalProducts()
     {
         $query = Product::query();
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->count();
     }
-
 
     #[Computed]
     public function recentTransactions()
     {
         $query = Transaction::with(['customer', 'user', 'tenant'])
             ->where('status', 'completed');
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         return $query->latest()->take(5)->get();
     }
 
@@ -174,11 +176,11 @@ class Dashboard extends Component
 
             $query = Transaction::where('status', 'completed')
                 ->whereDate('transaction_date', $date->toDateString());
-            
+
             if ($tenantId = $this->getTenantQuery()) {
                 $query->where('tenant_id', $tenantId);
             }
-            
+
             $salesAmount = $query->sum('total_amount');
 
             $last7Days[] = $dateFormatted;
@@ -195,37 +197,36 @@ class Dashboard extends Component
     public function salesByPaymentMethod()
     {
         $query = Transaction::where('status', 'completed');
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         $paymentMethods = $query->selectRaw('payment_method, SUM(total_amount) as total')
             ->groupBy('payment_method')
             ->get();
 
         return [
-            'labels' => $paymentMethods->pluck('payment_method')->map(function($method) {
+            'labels' => $paymentMethods->pluck('payment_method')->map(function ($method) {
                 return ucfirst($method);
             })->toArray(),
-            'data' => $paymentMethods->pluck('total')->map(function($total) {
+            'data' => $paymentMethods->pluck('total')->map(function ($total) {
                 return floatval($total);
             })->toArray(),
         ];
     }
 
-
     #[Computed]
     public function todayTopProducts()
     {
         $tenantId = $this->getTenantQuery();
-        
+
         return Product::with('category')
             ->join('transaction_items', 'products.id', '=', 'transaction_items.product_id')
             ->join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
             ->where('transactions.status', 'completed')
             ->whereDate('transactions.transaction_date', today())
-            ->when($tenantId, function($query) use ($tenantId) {
+            ->when($tenantId, function ($query) use ($tenantId) {
                 $query->where('transactions.tenant_id', $tenantId);
             })
             ->selectRaw('products.id, products.name, products.category_id, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.total_price) as total_revenue')
@@ -240,20 +241,20 @@ class Dashboard extends Component
     {
         $query = Transaction::where('status', 'completed')
             ->whereDate('transaction_date', today());
-        
+
         if ($tenantId = $this->getTenantQuery()) {
             $query->where('tenant_id', $tenantId);
         }
-        
+
         $paymentMethods = $query->selectRaw('payment_method, SUM(total_amount) as total, COUNT(*) as count')
             ->groupBy('payment_method')
             ->get();
 
         return [
-            'labels' => $paymentMethods->pluck('payment_method')->map(function($method) {
+            'labels' => $paymentMethods->pluck('payment_method')->map(function ($method) {
                 return ucfirst($method);
             })->toArray(),
-            'data' => $paymentMethods->pluck('total')->map(function($total) {
+            'data' => $paymentMethods->pluck('total')->map(function ($total) {
                 return floatval($total);
             })->toArray(),
             'counts' => $paymentMethods->pluck('count')->toArray(),

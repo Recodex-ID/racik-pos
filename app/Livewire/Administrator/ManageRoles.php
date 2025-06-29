@@ -38,8 +38,8 @@ class ManageRoles extends Component
     public function roles()
     {
         return Role::when($this->search, function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%');
-            })
+            $query->where('name', 'like', '%'.$this->search.'%');
+        })
             ->latest()
             ->paginate(10);
     }
@@ -68,7 +68,6 @@ class ManageRoles extends Component
         } else {
             $role = Role::create(['name' => $this->name]);
         }
-
 
         $message = $this->editingRoleId ? 'Role successfully updated!' : 'Role successfully created!';
 
