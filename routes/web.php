@@ -30,6 +30,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
     });
 
+    // Reports Routes (untuk admin dan kasir)
+    Route::middleware(['role:Admin|Cashier'])->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/monthly-transaction', \App\Livewire\Reports\MonthlyTransaction::class)->name('monthly-transaction');
+    });
+
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
