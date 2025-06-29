@@ -34,11 +34,11 @@ class Transaction extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'subtotal' => 'decimal:12,2',
-        'discount_amount' => 'decimal:12,2',
-        'total_amount' => 'decimal:12,2',
-        'payment_amount' => 'decimal:12,2',
-        'change_amount' => 'decimal:12,2',
+        'subtotal' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'payment_amount' => 'decimal:2',
+        'change_amount' => 'decimal:2',
     ];
 
     public function tenant(): BelongsTo
