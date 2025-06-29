@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,9 +14,38 @@ use Spatie\Permission\Models\Role;
 class Dashboard extends Component
 {
     #[Computed]
+    public function currentTenant()
+    {
+        return $this->getCurrentTenant();
+    }
+
+    private function getCurrentTenant()
+    {
+        // Try to get tenant from app instance first
+        try {
+            return app('current_tenant');
+        } catch (\Exception $e) {
+            // Fallback to getting from request attributes or user
+            $tenant = request()->attributes->get('current_tenant');
+            if ($tenant) {
+                return $tenant;
+            }
+
+            // Ultimate fallback: get user's tenant
+            $user = auth()->user();
+            if ($user->tenant_id) {
+                return Tenant::find($user->tenant_id);
+            }
+
+            throw new \Exception('No tenant context available');
+        }
+    }
+
+    #[Computed]
     public function totalUsers()
     {
-        return User::count();
+        $currentTenant = $this->getCurrentTenant();
+        return User::where('tenant_id', $currentTenant->id)->count();
     }
 
     #[Computed]
@@ -33,24 +63,35 @@ class Dashboard extends Component
     #[Computed]
     public function activeUsers()
     {
-        return User::whereNotNull('email_verified_at')->count();
+        $currentTenant = $this->getCurrentTenant();
+        return User::where('tenant_id', $currentTenant->id)
+            ->whereNotNull('email_verified_at')
+            ->count();
     }
 
     #[Computed]
     public function newUsersThisWeek()
     {
-        return User::where('created_at', '>=', now()->subDays(7))->count();
+        $currentTenant = $this->getCurrentTenant();
+        return User::where('tenant_id', $currentTenant->id)
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
     }
 
     #[Computed]
     public function recentUsers()
     {
-        return User::latest()->take(5)->get();
+        $currentTenant = $this->getCurrentTenant();
+        return User::where('tenant_id', $currentTenant->id)
+            ->latest()
+            ->take(5)
+            ->get();
     }
 
     #[Computed]
     public function userRegistrationTrend()
     {
+        $currentTenant = $this->getCurrentTenant();
         $last7Days = [];
         $userCounts = [];
 
@@ -58,7 +99,9 @@ class Dashboard extends Component
             $date = Carbon::now()->subDays($i);
             $dateFormatted = $date->format('M j');
 
-            $userCount = User::whereDate('created_at', $date->toDateString())->count();
+            $userCount = User::where('tenant_id', $currentTenant->id)
+                ->whereDate('created_at', $date->toDateString())
+                ->count();
 
             $last7Days[] = $dateFormatted;
             $userCounts[] = $userCount;
@@ -73,7 +116,9 @@ class Dashboard extends Component
     #[Computed]
     public function todayTransactions()
     {
-        return Transaction::with(['user', 'customer', 'transactionItems.product'])
+        $currentTenant = $this->getCurrentTenant();
+        return Transaction::byTenant($currentTenant->id)
+            ->with(['user', 'customer', 'transactionItems.product'])
             ->whereDate('transaction_date', today())
             ->latest('transaction_date')
             ->get();
@@ -82,8 +127,13 @@ class Dashboard extends Component
     #[Computed]
     public function todayTransactionStats()
     {
-        $completedTransactions = Transaction::whereDate('transaction_date', today())->completed();
-        $pendingTransactions = Transaction::whereDate('transaction_date', today())->where('status', Transaction::STATUS_PENDING);
+        $currentTenant = $this->getCurrentTenant();
+        $completedTransactions = Transaction::byTenant($currentTenant->id)
+            ->whereDate('transaction_date', today())
+            ->completed();
+        $pendingTransactions = Transaction::byTenant($currentTenant->id)
+            ->whereDate('transaction_date', today())
+            ->where('status', Transaction::STATUS_PENDING);
 
         return [
             'total_transactions' => $completedTransactions->count(),
@@ -96,6 +146,7 @@ class Dashboard extends Component
     #[Computed]
     public function todayTransactionChart()
     {
+        $currentTenant = $this->getCurrentTenant();
         $hours = [];
         $revenues = [];
         $counts = [];
@@ -105,7 +156,8 @@ class Dashboard extends Component
             $startTime = today()->setHour($hour)->setMinute(0)->setSecond(0);
             $endTime = today()->setHour($hour)->setMinute(59)->setSecond(59);
 
-            $hourlyTransactions = Transaction::whereDate('transaction_date', today())
+            $hourlyTransactions = Transaction::byTenant($currentTenant->id)
+                ->whereDate('transaction_date', today())
                 ->completed()
                 ->whereBetween('transaction_date', [$startTime, $endTime]);
 
@@ -124,6 +176,7 @@ class Dashboard extends Component
     #[Computed]
     public function weeklyTransactionChart()
     {
+        $currentTenant = $this->getCurrentTenant();
         $last7Days = [];
         $revenues = [];
         $counts = [];
@@ -132,7 +185,8 @@ class Dashboard extends Component
             $date = Carbon::now()->subDays($i);
             $dateFormatted = $date->format('M j');
 
-            $dailyTransactions = Transaction::whereDate('transaction_date', $date->toDateString())
+            $dailyTransactions = Transaction::byTenant($currentTenant->id)
+                ->whereDate('transaction_date', $date->toDateString())
                 ->completed();
 
             $last7Days[] = $dateFormatted;
