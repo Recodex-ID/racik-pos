@@ -7,11 +7,20 @@
     <header class="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-4 flex-shrink-0">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
+                @role('Admin')
                 <a href="{{ route('dashboard') }}" wire:navigate>
-                    <flux:button variant="outline" color="gray" size="sm" icon="arrow-left">
+                    <flux:button type="submit" variant="outline" color="gray" size="sm" icon="arrow-left">
                         Dashboard
                     </flux:button>
                 </a>
+                @else
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <flux:button type="submit" variant="primary" color="red" size="sm" icon="arrow-right-start-on-rectangle">
+                        Logout
+                    </flux:button>
+                </form>
+                @endrole
                 <div>
                     <h1 class="text-xl font-bold text-zinc-900 dark:text-zinc-100">Point of Sale</h1>
                     <p class="text-sm text-zinc-500 dark:text-zinc-400">

@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tenants', \App\Livewire\Administrator\ManageTenants::class)->name('tenants');
     });
 
-    // Tenant Management Routes (untuk staff toko)
+    // Tenant Management Routes (untuk admin)
     Route::middleware(['role:Admin'])->prefix('tenant')->name('tenant.')->group(function () {
         Route::get('/categories', \App\Livewire\Tenant\ManageCategories::class)->name('categories');
         Route::get('/products', \App\Livewire\Tenant\ManageProducts::class)->name('products');
@@ -27,15 +27,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/expenses', \App\Livewire\Tenant\ManageExpenses::class)->name('expenses');
     });
 
+    // Reports Routes (untuk admin)
+    Route::middleware(['role:Admin'])->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/monthly-transaction', \App\Livewire\Reports\MonthlyTransaction::class)->name('monthly-transaction');
+        Route::get('/monthly-expense', \App\Livewire\Reports\MonthlyExpense::class)->name('monthly-expense');
+    });
+
     // POS Routes (untuk kasir)
     Route::middleware(['role:Admin|Cashier'])->prefix('pos')->name('pos.')->group(function () {
         Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
-    });
-
-    // Reports Routes (untuk admin dan kasir)
-    Route::middleware(['role:Admin|Cashier'])->prefix('reports')->name('reports.')->group(function () {
-        Route::get('/monthly-transaction', \App\Livewire\Reports\MonthlyTransaction::class)->name('monthly-transaction');
-        Route::get('/monthly-expense', \App\Livewire\Reports\MonthlyExpense::class)->name('monthly-expense');
     });
 
     Route::redirect('settings', 'settings/profile');
