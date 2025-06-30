@@ -1,62 +1,33 @@
 ---
 deployment:
   tasks:
-    # Install Composer dependencies (production mode)
     - export COMPOSER_ALLOW_SUPERUSER=1
     - /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-    
-    # Install NPM dependencies and build assets
     - npm ci --only=production
     - npm run build
-    
-    # Create necessary directories
     - mkdir -p storage/logs
     - mkdir -p storage/framework/cache
     - mkdir -p storage/framework/sessions
     - mkdir -p storage/framework/views
     - mkdir -p bootstrap/cache
     - mkdir -p database/backups
-    
-    # Set proper permissions
-    - find storage -type f -exec chmod 644 {} \;
-    - find storage -type d -exec chmod 755 {} \;
-    - find bootstrap/cache -type f -exec chmod 644 {} \;
-    - find bootstrap/cache -type d -exec chmod 755 {} \;
-    - chmod -R 775 storage
-    - chmod -R 775 bootstrap/cache
+    - chmod 755 storage
+    - chmod 755 storage/logs
+    - chmod 755 storage/framework
+    - chmod 755 storage/framework/cache
+    - chmod 755 storage/framework/sessions
+    - chmod 755 storage/framework/views
+    - chmod 755 bootstrap/cache
     - chmod +x database-sync.sh
     - chmod +x deploy.sh
     - chmod +x backup.sh
-    
-    # Create storage symlink if not exists
-    - if [ ! -L public/storage ]; then ln -sf ../storage/app/public public/storage; fi
-    
-    # Backup database before migration (if MySQL available and configured)
-    - |
-      if [ -f ".env" ] && [ -n "$(grep 'DB_DATABASE=' .env)" ]; then
-        source .env
-        if [ -n "$DB_DATABASE" ] && [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ]; then
-          echo "Creating database backup..."
-          mysqldump -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" > "database/backups/pre_deploy_$(date +%Y%m%d_%H%M%S).sql" 2>/dev/null || echo "Database backup skipped - no MySQL access or credentials issue"
-        fi
-      fi
-    
-    # Laravel optimization and caching
+    - php artisan storage:link
     - php artisan config:clear
     - php artisan cache:clear
     - php artisan view:clear
     - php artisan route:clear
-    
-    # Run database migrations (production mode)
     - php artisan migrate --force
-    
-    # Cache optimization for production
     - php artisan config:cache
     - php artisan route:cache
     - php artisan view:cache
-    
-    # Final cleanup
-    - php artisan cache:clear
-    
-    # Log successful deployment
-    - echo "$(date): Deployment completed successfully via cPanel Git" >> storage/logs/deployment.log
+    - echo "Deployment completed successfully" >> storage/logs/deployment.log
