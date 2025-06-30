@@ -34,6 +34,8 @@ class ManageExpenses extends Component
 
     public $selectedCategory = '';
 
+    public $isManualCategory = false;
+
     public function rules(): array
     {
         return [
@@ -93,7 +95,7 @@ class ManageExpenses extends Component
 
     public function create()
     {
-        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId']);
+        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId', 'isManualCategory']);
         $this->expense_date = now()->format('Y-m-d');
         $this->showModal = true;
     }
@@ -108,6 +110,7 @@ class ManageExpenses extends Component
         $this->category = $expense->category;
         $this->expense_date = $expense->expense_date->format('Y-m-d');
         $this->receipt_file = null;
+        $this->isManualCategory = !in_array($expense->category, $this->categories);
         $this->showModal = true;
     }
 
@@ -143,7 +146,7 @@ class ManageExpenses extends Component
             $message = 'Pengeluaran berhasil ditambahkan!';
         }
 
-        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId']);
+        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId', 'isManualCategory']);
         $this->showModal = false;
 
         session()->flash('message', $message);
@@ -165,7 +168,7 @@ class ManageExpenses extends Component
 
     public function resetForm()
     {
-        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId']);
+        $this->reset(['title', 'description', 'amount', 'category', 'expense_date', 'receipt_file', 'editingExpenseId', 'isManualCategory']);
         $this->resetValidation();
     }
 

@@ -60,11 +60,11 @@
     <!-- Filters -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari pengeluaran..." icon="magnifying-glass" />
-        
+
         <flux:select wire:model.live="selectedCategory" placeholder="Semua Kategori">
-            <option value="">Semua Kategori</option>
+            <flux:select.option value="">Semua Kategori</flux:select.option>
             @foreach ($this->categories as $category)
-                <option value="{{ $category }}">{{ $category }}</option>
+                <flux:select.option value="{{ $category }}">{{ $category }}</flux:select.option>
             @endforeach
         </flux:select>
 
@@ -181,11 +181,19 @@
 
                 <flux:field>
                     <flux:label>Kategori</flux:label>
-                    <flux:select wire:model="category" placeholder="Pilih kategori">
-                        @foreach ($this->categories as $cat)
-                            <option value="{{ $cat }}">{{ $cat }}</option>
-                        @endforeach
-                    </flux:select>
+
+                    <flux:switch wire:model.live="isManualCategory" label="Input kategori manual" align="left" class="mb-2" />
+
+                    @if($isManualCategory)
+                        <flux:input wire:model="category" placeholder="Masukkan kategori baru..." />
+                    @else
+                        <flux:select wire:model="category" placeholder="Pilih kategori">
+                            @foreach ($this->categories as $cat)
+                                <flux:select.option value="{{ $cat }}">{{ $cat }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    @endif
+
                     <flux:error name="category" />
                 </flux:field>
 
