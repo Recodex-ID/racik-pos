@@ -442,6 +442,9 @@ class Cashier extends Component
 
             $currentTenant = $this->getCurrentTenant();
 
+            // Generate a fresh transaction number within the transaction to avoid race conditions
+            $this->generateUniqueTransactionNumber();
+
             // Create transaction
             $transaction = Transaction::create([
                 'tenant_id' => $currentTenant->id,
@@ -548,20 +551,28 @@ class Cashier extends Component
         $currentTenant = $this->getCurrentTenant();
         $tenantInitials = $currentTenant->getInitials();
         $today = now()->format('Ymd');
-        $userId = auth()->id();
+        $tenantId = $currentTenant->id;
         
-        // Generate unique transaction number using tenant initials
-        // Format: {tenant_initials}-{date}-{user_id}
+        // Get today's transaction count for this tenant to ensure uniqueness
+        $todayTransactionCount = Transaction::where('tenant_id', $currentTenant->id)
+            ->whereDate('transaction_date', now()->toDateString())
+            ->count();
+        
+        // Generate unique transaction number using tenant initials with sequential number
+        // Format: {tenant_initials}-{date}-{tenant_id}-{sequential_number}
+        $sequentialNumber = str_pad($todayTransactionCount + 1, 3, '0', STR_PAD_LEFT);
+        
         $this->transactionNumber = sprintf(
-            '%s-%s-%d',
+            '%s-%s-%d-%s',
             $tenantInitials,
             $today,
-            $userId
+            $tenantId,
+            $sequentialNumber
         );
         
-        // Fallback: If somehow still duplicate, add sequential number
+        // Double-check for uniqueness and increment if needed
         $attempts = 1;
-        $baseTransactionNumber = $this->transactionNumber;
+        $baseSequentialNumber = $todayTransactionCount + 1;
         
         while ($attempts <= 999) {
             $existingTransaction = Transaction::where('transaction_number', $this->transactionNumber)->first();
@@ -570,11 +581,59 @@ class Cashier extends Component
                 break; // Unique number found
             }
             
-            // Add sequential number for uniqueness
+            // Increment sequential number for uniqueness
+            $newSequentialNumber = str_pad($baseSequentialNumber + $attempts, 3, '0', STR_PAD_LEFT);
             $this->transactionNumber = sprintf(
-                '%s-%03d',
-                $baseTransactionNumber,
-                $attempts
+                '%s-%s-%d-%s',
+                $tenantInitials,
+                $today,
+                $tenantId,
+                $newSequentialNumber
+            );
+            
+            $attempts++;
+        }
+    }
+
+    private function generateUniqueTransactionNumber()
+    {
+        $currentTenant = $this->getCurrentTenant();
+        $tenantInitials = $currentTenant->getInitials();
+        $today = now()->format('Ymd');
+        $tenantId = $currentTenant->id;
+        
+        // Use a more robust approach with timestamp and random component
+        $timestamp = now()->format('His'); // HHMMSS
+        $randomComponent = str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
+        
+        // Format: {tenant_initials}-{date}-{timestamp}-{tenant_id}-{random}
+        $this->transactionNumber = sprintf(
+            '%s-%s-%s-%d-%s',
+            $tenantInitials,
+            $today,
+            $timestamp,
+            $tenantId,
+            $randomComponent
+        );
+        
+        // Final check for uniqueness (very unlikely to conflict)
+        $attempts = 1;
+        while ($attempts <= 10) {
+            $existingTransaction = Transaction::where('transaction_number', $this->transactionNumber)->first();
+            
+            if (!$existingTransaction) {
+                break; // Unique number found
+            }
+            
+            // Generate new random component if conflict found
+            $randomComponent = str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
+            $this->transactionNumber = sprintf(
+                '%s-%s-%s-%d-%s',
+                $tenantInitials,
+                $today,
+                $timestamp,
+                $tenantId,
+                $randomComponent
             );
             
             $attempts++;
