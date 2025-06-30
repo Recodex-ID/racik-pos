@@ -71,11 +71,98 @@ php artisan db:seed --class=UserSeeder
 - **PestPHP** for testing
 - **Vite** with **Tailwind CSS 4.x**
 
+### Multi-Tenancy Architecture
+
+**Tenant Resolution Pattern** (3-layer fallback):
+```php
+private function getCurrentTenant()
+{
+    // 1. Try app service container
+    try { return app('current_tenant'); }
+    
+    // 2. Try request attributes  
+    $tenant = request()->attributes->get('current_tenant');
+    if ($tenant) return $tenant;
+    
+    // 3. Fallback to user's tenant_id
+    if ($user->tenant_id) return Tenant::find($user->tenant_id);
+    
+    throw new \Exception('No tenant context available');
+}
+```
+
+**Data Isolation Patterns**:
+- All models use `scopeByTenant()` methods
+- Consistent `tenant_id` foreign key constraints
+- Computed properties for tenant context: `#[Computed] currentTenant()`
+- Super Admin bypass with cross-tenant access
+
+### Component Organization Hierarchy
+
+```
+app/Livewire/
+├── Actions/            # System-level actions (Logout)
+├── Administrator/      # Super Admin components (cross-tenant)
+│   ├── ManageUsers.php
+│   ├── ManageRoles.php
+│   └── ManageTenants.php
+├── Tenant/            # Tenant-scoped CRUD operations
+│   ├── ManageCategories.php
+│   ├── ManageCustomers.php
+│   ├── ManageProducts.php
+│   └── ManageExpenses.php
+├── Pos/               # Point-of-Sale system
+│   └── Cashier.php    # Cart management & transaction processing
+├── Reports/           # Analytics & reporting
+│   ├── MonthlyTransaction.php
+│   └── MonthlyExpense.php
+└── Dashboard.php      # Multi-tenant analytics dashboard
+```
+
+### POS System Architecture
+
+**Cart State Management**:
+- Persistent cart keys: `product_{id}`
+- Draft transaction system with database persistence
+- Real-time calculations (subtotal, discount, change)
+- Transaction number generation with tenant initials
+
+**Transaction Workflow**:
+```
+Cart Building → Payment Processing → Transaction Completion
+     ↓              ↓                    ↓
+  Draft Save    Validation &         Receipt Generation
+              Amount Calculation    & Stock Updates
+```
+
+**Features**:
+- Multistep transaction flow with state persistence
+- Quick customer creation within POS flow
+- Real-time inventory checking and filtering
+- Draft save/load for interrupted transactions
+
+### Reporting Architecture
+
+**Temporal Data Analysis**:
+- Year/month selection with automatic pagination reset
+- Daily chart generation with configurable date ranges
+- Month-over-month comparison analytics
+- Real-time statistical computations
+
+**Multi-Dimensional Analytics**:
+- Category-based expense/transaction breakdowns
+- Payment method statistics and trends
+- Top products and expenses analysis
+- Chart.js integration with tenant-aware data
+
 ### Key Directories
 ```
 app/Livewire/           # Livewire components
 ├── Actions/            # Action components (Logout)
 ├── Administrator/      # Admin CRUD components
+├── Tenant/            # Tenant-scoped components
+├── Pos/               # Point-of-Sale components
+├── Reports/           # Analytics components
 └── Dashboard.php       # Main dashboard with analytics
 
 resources/views/
@@ -84,11 +171,18 @@ resources/views/
 └── components/        # Blade components
 
 resources/js/          # JavaScript with Chart.js integration
+├── app.js             # Main entry point
+├── chart.js           # Dashboard chart implementations
+└── bootstrap.js       # Axios configuration
+
 resources/css/         # Tailwind CSS with Flux theming
 ```
 
 ### Database Structure
 - **Users table** with roles & permissions (Spatie package)
+- **Tenants table** with `is_active` status
+- **Multi-tenant tables** with `tenant_id` foreign keys
+- **Transactions/Products/Categories** with tenant isolation
 - **Cache/Jobs/Sessions** using database driver
 - **SQLite in-memory** for testing
 
@@ -97,12 +191,51 @@ resources/css/         # Tailwind CSS with Flux theming
 - **Role-based middleware**: `role:Super Admin` 
 - **Route protection** with `auth`, `verified` middleware
 - **Blade directives**: `@role('Super Admin')` for template-level access
+- **Tenant-aware authorization** in component methods
 
-### Component Architecture
-- **Dashboard Component**: Analytics with computed properties, Chart.js integration, paginated recent users
-- **Administrator Components**: Full CRUD for Users, Roles, Permissions with modal forms
-- **Form Objects**: Livewire v3 form abstraction for maintainability
-- **Computed Properties**: Database queries cached within component lifecycle
+### Component Architecture Patterns
+
+**Standardized CRUD Pattern**:
+```php
+// Standard properties
+public $editingEntityId = null;
+public $showModal = false;
+public $search = '';
+
+// Standard methods
+public function create()     // Reset form & open modal
+public function edit($id)    // Load entity & open modal  
+public function save()       // Validate & save entity
+public function delete($id)  // Delete with confirmation
+public function resetForm()  // Clear form state
+```
+
+**File Upload Management**:
+- Consistent use of `WithFileUploads` trait
+- Storage management with cleanup on updates
+- Image handling for products with validation
+- Receipt file handling for expenses
+- Existing file preservation during updates
+
+**Search and Filtering**:
+- Multi-field search implementations
+- Category-based filtering with dropdowns
+- Real-time filtering with computed properties
+- Pagination integration with preserved search state
+
+### Business Logic Patterns
+
+**Transaction Processing**:
+- Database transaction wrapping for data consistency
+- Error handling with automatic rollback mechanisms
+- Status-based workflow: `draft → pending → completed`
+- Audit trail maintenance with user tracking
+
+**Form Handling**:
+- Dynamic form behavior (manual category input toggles)
+- Conditional validation rules based on form state
+- Real-time property updates with `updated()` method
+- File upload with existing file preservation
 
 ## Development Notes
 - use the flux(resources/views/flux) component in the created view
@@ -111,7 +244,7 @@ resources/css/         # Tailwind CSS with Flux theming
 - the generated code must always be consistent with the existing code.
 
 ## Git Best Practices
-- biasakan konfirmasi dahulu sebelum push ke repo
+- make sure to confirm first before pushing to the repo
 
 ## JavaScript + Livewire Integration Best Practices
 
