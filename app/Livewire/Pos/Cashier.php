@@ -68,8 +68,11 @@ class Cashier extends Component
         ];
     }
 
-    public function mount()
+    public function mount($draftId = null)
     {
+        if ($draftId) {
+            $this->loadDraft($draftId);
+        }
         $this->calculateTotals();
         $this->generateTransactionNumber();
     }
@@ -442,27 +445,56 @@ class Cashier extends Component
 
             $currentTenant = $this->getCurrentTenant();
 
-            // Generate a fresh transaction number within the transaction to avoid race conditions
-            $this->generateUniqueTransactionNumber();
+            $transaction = null; // Initialize transaction variable
 
-            // Create transaction
-            $transaction = Transaction::create([
-                'tenant_id' => $currentTenant->id,
-                'customer_id' => $this->selectedCustomerId,
-                'user_id' => auth()->id(),
-                'transaction_number' => $this->transactionNumber,
-                'transaction_date' => now(),
-                'subtotal' => $this->subtotal,
-                'discount_amount' => $this->discountAmount,
-                'total_amount' => $this->totalAmount,
-                'payment_method' => $this->paymentMethod,
-                'payment_amount' => $this->paymentAmount,
-                'change_amount' => $this->changeAmount,
-                'status' => Transaction::STATUS_COMPLETED,
-                'notes' => $this->notes,
-            ]);
+            if ($this->currentDraftId) {
+                // Update existing draft transaction
+                $transaction = Transaction::find($this->currentDraftId);
+                if (!$transaction) {
+                    throw new \Exception('Draft transaction not found.');
+                }
 
-            // Create transaction items
+                // Update transaction data
+                $transaction->update([
+                    'customer_id' => $this->selectedCustomerId,
+                    // Keep existing transaction_number from draft
+                    'transaction_date' => now(),
+                    'subtotal' => $this->subtotal,
+                    'discount_amount' => $this->discountAmount,
+                    'total_amount' => $this->totalAmount,
+                    'payment_method' => $this->paymentMethod,
+                    'payment_amount' => $this->paymentAmount,
+                    'change_amount' => $this->changeAmount,
+                    'status' => Transaction::STATUS_COMPLETED, // Change status to completed
+                    'notes' => $this->notes,
+                ]);
+
+                // Delete existing transaction items and re-create them
+                $transaction->transactionItems()->delete();
+
+            } else {
+                // Generate a fresh transaction number for new transactions
+                $this->generateUniqueTransactionNumber();
+
+                // Create new transaction
+                $transaction = Transaction::create([
+                    'tenant_id' => $currentTenant->id,
+                    'customer_id' => $this->selectedCustomerId,
+                    'user_id' => auth()->id(),
+                    'transaction_number' => $this->transactionNumber,
+                    'transaction_date' => now(),
+                    'subtotal' => $this->subtotal,
+                    'discount_amount' => $this->discountAmount,
+                    'total_amount' => $this->totalAmount,
+                    'payment_method' => $this->paymentMethod,
+                    'payment_amount' => $this->paymentAmount,
+                    'change_amount' => $this->changeAmount,
+                    'status' => Transaction::STATUS_COMPLETED,
+                    'notes' => $this->notes,
+                ]);
+            }
+
+            // Create transaction items (for both new and updated transactions)
             foreach ($this->cart as $item) {
                 TransactionItem::create([
                     'transaction_id' => $transaction->id,
@@ -477,6 +509,11 @@ class Cashier extends Component
 
             // Reset form
             $this->resetTransaction();
+
+            // Delete the draft if it was loaded
+            if ($this->currentDraftId) {
+                Transaction::find($this->currentDraftId)->delete();
+            }
 
             session()->flash('success', "Transaksi berhasil! No: {$transaction->transaction_number}");
 

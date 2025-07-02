@@ -215,7 +215,8 @@
                     </thead>
                     <tbody>
                         @foreach($this->todayTransactions as $transaction)
-                            <tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                            <tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 @if($transaction->status === \App\Models\Transaction::STATUS_PENDING) cursor-pointer @endif"
+                                @if($transaction->status === \App\Models\Transaction::STATUS_PENDING) wire:click="loadPendingTransaction({{ $transaction->id }})" @endif>
                                 <td class="py-3 px-4">
                                     <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $transaction->transaction_number }}</span>
                                 </td>

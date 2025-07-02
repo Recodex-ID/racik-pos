@@ -11,16 +11,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenant = Tenant::where('name', 'Machine Coffee SMI')->first();
+        $tenant = Tenant::where('name', 'Recodex ID')->first();
 
         if ($tenant) {
             // Akun Admin
             $admin = User::create([
-                'name' => 'Machine',
-                'username' => 'machine_coffee_',
-                'email' => 'pengkorstyle48@gmail.com',
+                'name' => 'Admin',
+                'username' => 'admin_recodex',
+                'email' => 'admin@recodex.id',
                 'email_verified_at' => now(),
-                'password' => Hash::make('Machine24'),
+                'password' => Hash::make('admin123'),
                 'tenant_id' => $tenant->id,
                 'is_active' => true,
             ]);
@@ -28,11 +28,11 @@ class UserSeeder extends Seeder
 
             // Akun Kasir
             $cashier = User::create([
-                'name' => 'Mesin',
-                'username' => 'mesinkopi',
-                'email' => 'kasir.pengkorstyle48@gmail.com', // Modified to avoid duplicate email
+                'name' => 'Kasir',
+                'username' => 'kasir_recodex',
+                'email' => 'kasir@recodex.id',
                 'email_verified_at' => now(),
-                'password' => Hash::make('Mesinkopi24'),
+                'password' => Hash::make('kasir123'),
                 'tenant_id' => $tenant->id,
                 'is_active' => true,
             ]);

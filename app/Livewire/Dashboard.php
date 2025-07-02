@@ -297,4 +297,10 @@ class Dashboard extends Component
     {
         return view('livewire.dashboard');
     }
+
+    public function loadPendingTransaction($transactionId)
+    {
+        // Redirect to cashier page with the transaction ID
+        return redirect()->route('pos.cashier', ['draftId' => $transactionId]);
+    }
 }
