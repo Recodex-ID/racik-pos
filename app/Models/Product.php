@@ -53,4 +53,19 @@ class Product extends Model
     {
         return $query->where('tenant_id', $tenantId);
     }
+
+    public function getInitials(): string
+    {
+        $words = explode(' ', $this->name);
+        $initials = '';
+
+        if (count($words) >= 2) {
+            $initials .= strtoupper(substr($words[0], 0, 1));
+            $initials .= strtoupper(substr($words[1], 0, 1));
+        } else {
+            $initials .= strtoupper(substr($words[0], 0, 2));
+        }
+
+        return $initials;
+    }
 }

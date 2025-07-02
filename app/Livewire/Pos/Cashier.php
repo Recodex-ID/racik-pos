@@ -68,13 +68,14 @@ class Cashier extends Component
         ];
     }
 
-    public function mount($draftId = null)
+    public function mount($transactionId = null)
     {
-        if ($draftId) {
-            $this->loadDraft($draftId);
+        if ($transactionId) {
+            $this->loadPendingTransaction($transactionId);
+        } else {
+            $this->generateTransactionNumber();
         }
         $this->calculateTotals();
-        $this->generateTransactionNumber();
     }
 
     #[Computed]
@@ -256,48 +257,52 @@ class Cashier extends Component
         }
     }
 
-    public function loadDraft($draftId)
+    public function loadPendingTransaction($transactionId)
     {
         $currentTenant = $this->getCurrentTenant();
 
-        $draft = Transaction::byTenant($currentTenant->id)
-            ->drafts()
+        $transaction = Transaction::byTenant($currentTenant->id)
+            ->where('status', Transaction::STATUS_PENDING)
             ->where('user_id', auth()->id())
             ->with(['customer', 'transactionItems.product'])
-            ->find($draftId);
+            ->find($transactionId);
 
-        if (! $draft) {
-            session()->flash('error', 'Draft tidak ditemukan!');
+        if (! $transaction) {
+            session()->flash('error', 'Transaksi pending tidak ditemukan atau tidak dapat dimuat!');
 
             return;
         }
 
         // Load draft data
-        $this->currentDraftId = $draft->id;
-        $this->selectedCustomerId = $draft->customer_id;
+        $this->currentDraftId = $transaction->id;
+        $this->selectedCustomerId = $transaction->customer_id;
         $this->discountValue = $this->discountType === 'percentage'
-            ? (float) (($draft->discount_amount / $draft->subtotal) * 100)
-            : (float) $draft->discount_amount;
-        $this->notes = $draft->notes;
-        $this->transactionNumber = $draft->transaction_number;
+            ? (float) (($transaction->discount_amount / $transaction->subtotal) * 100)
+            : (float) $transaction->discount_amount;
+        $this->notes = $transaction->notes;
+        $this->transactionNumber = $transaction->transaction_number;
 
         // Load cart from transaction items
         $this->cart = [];
-        foreach ($draft->transactionItems as $item) {
+        foreach ($transaction->transactionItems as $item) {
+            $productName = $item->product ? $item->product->name : 'Produk Tidak Ditemukan';
+            $productPrice = (float) $item->unit_price; // Explicitly cast to float
+
             $cartKey = 'product_'.$item->product_id;
             $this->cart[$cartKey] = [
                 'product_id' => $item->product_id,
-                'name' => $item->product->name,
-                'price' => $item->unit_price,
+                'name' => $productName,
+                'price' => $productPrice,
                 'quantity' => $item->quantity,
+                'image' => $item->product ? $item->product->image : null,
+                'initials' => $item->product ? $item->product->getInitials() : '??',
             ];
         }
 
         $this->calculateTotals();
         $this->showDraftsModal = false;
-        $this->showCartModal = true;
 
-        session()->flash('success', 'Draft berhasil dimuat!');
+        session()->flash('success', 'Transaksi pending berhasil dimuat!');
     }
 
     public function deleteDraft($draftId)
@@ -338,6 +343,8 @@ class Cashier extends Component
                 'name' => $product->name,
                 'price' => $product->price,
                 'quantity' => 1,
+                'image' => $product->image,
+                'initials' => $product->getInitials(),
             ];
         }
 
@@ -450,7 +457,7 @@ class Cashier extends Component
             if ($this->currentDraftId) {
                 // Update existing draft transaction
                 $transaction = Transaction::find($this->currentDraftId);
-                if (!$transaction) {
+                if (! $transaction) {
                     throw new \Exception('Draft transaction not found.');
                 }
 
@@ -473,9 +480,6 @@ class Cashier extends Component
                 $transaction->transactionItems()->delete();
 
             } else {
-                // Generate a fresh transaction number for new transactions
-                $this->generateUniqueTransactionNumber();
-
                 // Create new transaction
                 $transaction = Transaction::create([
                     'tenant_id' => $currentTenant->id,
@@ -509,11 +513,6 @@ class Cashier extends Component
 
             // Reset form
             $this->resetTransaction();
-
-            // Delete the draft if it was loaded
-            if ($this->currentDraftId) {
-                Transaction::find($this->currentDraftId)->delete();
-            }
 
             session()->flash('success', "Transaksi berhasil! No: {$transaction->transaction_number}");
 
@@ -632,50 +631,7 @@ class Cashier extends Component
         }
     }
 
-    private function generateUniqueTransactionNumber()
-    {
-        $currentTenant = $this->getCurrentTenant();
-        $tenantInitials = $currentTenant->getInitials();
-        $today = now()->format('Ymd');
-        $tenantId = $currentTenant->id;
-        
-        // Use a more robust approach with timestamp and random component
-        $timestamp = now()->format('His'); // HHMMSS
-        $randomComponent = str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
-        
-        // Format: {tenant_initials}-{date}-{timestamp}-{tenant_id}-{random}
-        $this->transactionNumber = sprintf(
-            '%s-%s-%s-%d-%s',
-            $tenantInitials,
-            $today,
-            $timestamp,
-            $tenantId,
-            $randomComponent
-        );
-        
-        // Final check for uniqueness (very unlikely to conflict)
-        $attempts = 1;
-        while ($attempts <= 10) {
-            $existingTransaction = Transaction::where('transaction_number', $this->transactionNumber)->first();
-            
-            if (!$existingTransaction) {
-                break; // Unique number found
-            }
-            
-            // Generate new random component if conflict found
-            $randomComponent = str_pad(random_int(1, 999), 3, '0', STR_PAD_LEFT);
-            $this->transactionNumber = sprintf(
-                '%s-%s-%s-%d-%s',
-                $tenantInitials,
-                $today,
-                $timestamp,
-                $tenantId,
-                $randomComponent
-            );
-            
-            $attempts++;
-        }
-    }
+    
 
     public function render()
     {

@@ -113,7 +113,7 @@
                                             <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="w-full h-24 object-cover rounded-lg">
                                         @else
                                             <div class="w-full h-24 bg-zinc-100 dark:bg-zinc-700 rounded-lg flex items-center justify-center">
-                                                <flux:icon name="photo" class="h-6 w-6 text-zinc-400" />
+                                                <span class="text-2xl font-bold text-zinc-400">{{ $product->getInitials() }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -158,7 +158,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg">Keranjang Belanja</flux:heading>
                     @if(count($cart) > 0)
-                        <flux:button wire:click="clearCart" variant="outline" size="sm" color="red" icon="trash">
+                        <flux:button wire:click="clearCart" variant="primary" size="sm" color="red" icon="trash">
                             Kosongkan
                         </flux:button>
                     @endif
@@ -168,7 +168,7 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <flux:label class="text-sm">Pelanggan</flux:label>
-                        <flux:button wire:click="$set('showCustomerModal', true)" size="xs" variant="outline" color="blue" icon="plus">
+                        <flux:button wire:click="$set('showCustomerModal', true)" size="xs" variant="primary" color="blue" icon="plus">
                             Baru
                         </flux:button>
                     </div>
@@ -192,11 +192,20 @@
                         @foreach($cart as $key => $item)
                             <div class="p-3 bg-zinc-50 dark:bg-zinc-700 rounded-lg">
                                 <div class="flex items-start justify-between mb-2">
-                                    <div class="flex-1 mr-2">
-                                        <h3 class="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{{ $item['name'] }}</h3>
-                                        <p class="text-xs text-zinc-600 dark:text-zinc-300">
-                                            Rp {{ number_format($item['price'], 0, ',', '.') }}
-                                        </p>
+                                    <div class="flex items-start space-x-3">
+                                        @if($item['image'])
+                                            <img src="{{ Storage::url($item['image']) }}" alt="{{ $item['name'] }}" class="w-12 h-12 object-cover rounded-md">
+                                        @else
+                                            <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-600 rounded-md flex items-center justify-center">
+                                                <span class="text-lg font-bold text-zinc-400">{{ $item['initials'] }}</span>
+                                            </div>
+                                        @endif
+                                        <div class="flex-1">
+                                            <h3 class="font-medium text-zinc-900 dark:text-zinc-100 text-sm">{{ $item['name'] }}</h3>
+                                            <p class="text-xs text-zinc-600 dark:text-zinc-300">
+                                                Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                            </p>
+                                        </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100">
@@ -204,21 +213,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between pl-16">
                                     <div class="flex items-center space-x-1">
                                         <flux:button
                                             wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] - 1 }})"
-                                            size="xs" variant="outline" color="yellow" icon="minus" />
+                                            size="xs" variant="primary" color="yellow" icon="minus" />
                                         <span class="px-2 py-1 bg-white dark:bg-zinc-600 rounded text-xs font-medium min-w-[2rem] text-center">
                                             {{ $item['quantity'] }}
                                         </span>
                                         <flux:button
                                             wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] + 1 }})"
-                                            size="xs" variant="outline" color="green" icon="plus" />
+                                            size="xs" variant="primary" color="green" icon="plus" />
                                     </div>
                                     <flux:button
                                         wire:click="removeFromCart('{{ $key }}')"
-                                        size="xs" variant="outline" color="red" icon="x-mark" />
+                                        size="xs" variant="primary" color="red" icon="x-mark" />
                                 </div>
                             </div>
                         @endforeach
@@ -287,7 +296,7 @@
                 <div class="space-y-2">
                     <flux:button
                         wire:click="saveToDraft"
-                        variant="outline"
+                        variant="primary"
                         color="yellow"
                         size="sm"
                         icon="document-plus"
@@ -465,7 +474,7 @@
 
                                 <div class="flex gap-2">
                                     <flux:button
-                                        wire:click="loadDraft({{ $draft->id }})"
+                                        wire:click="loadPendingTransaction({{ $draft->id }})"
                                         variant="primary"
                                         size="sm"
                                         class="flex-1">

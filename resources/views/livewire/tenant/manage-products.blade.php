@@ -57,7 +57,7 @@
                                         <img class="h-12 w-12 rounded-lg object-cover" src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
                                     @else
                                         <div class="h-12 w-12 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
-                                            <flux:icon name="photo" class="h-6 w-6 text-zinc-400" />
+                                            <span class="text-xl font-bold text-zinc-400">{{ $product->getInitials() }}</span>
                                         </div>
                                     @endif
                                 </div>

@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
 
     // POS Routes (untuk kasir)
     Route::middleware(['role:Admin|Cashier'])->prefix('pos')->name('pos.')->group(function () {
-        Route::get('/cashier', \App\Livewire\Pos\Cashier::class)->name('cashier');
+        Route::get('/cashier/{transactionId?}', \App\Livewire\Pos\Cashier::class)->name('cashier');
     });
 
     Route::redirect('settings', 'settings/profile');

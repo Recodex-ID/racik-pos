@@ -218,7 +218,7 @@
                             <tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 @if($transaction->status === \App\Models\Transaction::STATUS_PENDING) cursor-pointer @endif"
                                 @if($transaction->status === \App\Models\Transaction::STATUS_PENDING) wire:click="loadPendingTransaction({{ $transaction->id }})" @endif>
                                 <td class="py-3 px-4">
-                                    <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $transaction->transaction_number }}</span>
+                                    <span class="text-sm font-medium {{ $transaction->status === \App\Models\Transaction::STATUS_PENDING ? 'text-blue-600 dark:text-blue-400' : 'text-zinc-900 dark:text-zinc-100' }}">{{ $transaction->transaction_number }}</span>
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ $transaction->transaction_date->format('H:i') }}</span>
